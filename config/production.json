@@ -1,0 +1,12 @@
+{
+    "nombre": "Api LLantaCity",
+    "configDb":{
+        "HOST": "racecar.mx",
+        "DATABASE": "racecar_llantacity",
+        "USER": "racecar_llantacity",
+        "PASSWORD": ",WD4VFuK6BA0"
+    },
+    "URLS": {
+        "HOST": "https://llantacity.mx:8083"
+    }
+}
