@@ -12,3 +12,32 @@ exports.getAllTires = async function () {
         });
     });
 }
+
+exports.getAllTiresPagination = async function (request) {
+    return await new Promise((resolve, reject) => {
+        const limit = request.limit
+        // page number
+        const page = request.page
+        // calculate offset
+        const offset = (page - 1) * limit
+        dbConn.query("Select * from t_tires where t_tires.active = 1 LIMIT " + limit + " OFFSET " + offset, function (err, result) {
+            if (err) {
+                return reject(err);
+            } else {
+                dbConn.query("SELECT COUNT(*) AS cantidad FROM t_tires where t_tires.active = 1", function (err, quantity) {
+                    if (err) {
+                        return reject(err);
+                    } else {
+                        var jsonResult = {
+                            'total': quantity[0].cantidad,
+                            'per_page': limit,
+                            'current_page': page,
+                            'last_page': Number.isInteger(quantity[0].cantidad / limit) ? Math.round(quantity[0].cantidad / limit) : Math.round(quantity[0].cantidad / limit) + 1 
+                        }
+                        return resolve({ pagination: jsonResult, tires: result });
+                    }
+                });
+            }
+        });
+    });
+}

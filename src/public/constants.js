@@ -15,4 +15,6 @@ module.exports = Object.freeze({
   LIST_MSG: 'Los registros se obtuvieron correctamente.',
   MSG_GET: 'El registro se ha obtenido con éxito.',
 
+  //URLS
+  URL_WOOCOMMERCE: 'https://llantacity.mx/beta/'
 });
