@@ -15,6 +15,9 @@ module.exports = Object.freeze({
   LIST_MSG: 'Los registros se obtuvieron correctamente.',
   MSG_GET: 'El registro se ha obtenido con éxito.',
 
+  //PRODUCTS BACTH
+  BATCH_PRODUCT: 'Registros actualizados en WooCommerce',
+
   //URLS
   URL_WOOCOMMERCE: 'https://llantacity.mx/',
   URL_IMAGE_WOOCOMERCE: 'https://llantacity.mx/uploads/tires/',

@@ -8,17 +8,29 @@ var async = require('async');
 const axios = require('axios');
 
 ruta.post('/insertDataInWooCommerce', (req, res) => {
-    var batchProductList = []
+    var batchProductListCreate = []
+    var batchProductListUpdate = []
     //Get all categories
     getAllCategories().then(async categorias => {
         //GET ALL TAGS
-        getAllTags().then(async tags => {
+        await getAllTags().then(async tags => {
             //GET FIRST TIRES
-            Tires.getAllTiresPagination({ page: 1, limit: 10 }).then(async firtsTires => {
-                for (var i = 0; i < firtsTires; i++) {
-                    batchProductList.push(transformJson(i, categorias, tags))
+            await Tires.getAllTiresPagination({ page: 1, limit: 10 }).then(async firtsTires => {
+                // ITERATE FIRSTS TIRES
+                for (var i = 0; i < firtsTires.tires.length; i++) {
+                    var transformData = await transformJson(firtsTires.tires[i], categorias.data, tags.data)
+                    if (transformData.id_woocommerce == null) {
+                        batchProductListCreate.push(transformData)
+                    } else {
+                        batchProductListUpdate.push(transformData)
+                    }
                 }
-                res.json(headers.getSuccessResponse(constantes.SAVE_MSG, batchProductList));
+                //UPDATE BATCH PRODUCTS
+                await batchProducts(batchProductListCreate, batchProductListUpdate).then(async batchData => {                    
+                    res.json(headers.getSuccessResponse(constantes.BATCH_PRODUCT, null));
+                }).catch((err) => {
+                    return res.status(500).json(headers.getInternalErrorResponse(constantes.SERVER_ERROR, err));
+                });
             }).catch((err) => {
                 return res.status(500).json(headers.getInternalErrorResponse(constantes.SERVER_ERROR, err));
             });
@@ -31,7 +43,7 @@ ruta.post('/insertDataInWooCommerce', (req, res) => {
 })
 
 function matchCategory(categorias, categoryMysql) {
-    var category = categorias.filter(categoryD => categoryD.name.toLowerCase() == categoryMysql.toLowerCase())
+    var category = categorias.find(categoryD => categoryD.name.toLowerCase() == categoryMysql.toLowerCase())
     if (category) {
         return category.id
     } else {
@@ -40,29 +52,29 @@ function matchCategory(categorias, categoryMysql) {
 }
 
 function matchTag(tags, tagMysql) {
-    var tag = tags.filter(tagD => tagD.name.toLowerCase() == tagMysql.toLowerCase())
-    if (category) {
+    var tag = tags.find(tagD => tagD.name.toLowerCase() == tagMysql.toLowerCase())
+    if (tag) {
         return tag.id
     } else {
         return null
     }
 }
 
-function changeHomologacion(homologacion) {
+function changeHomologacion(prodHomologacion) {
     var homologacion = '';
-    if (homologacion == null) {
+    if (prodHomologacion == null || prodHomologacion == "NULL") {
         homologacion = "";
     } else {
-        homologacion = homologacion + " ";
+        homologacion = prodHomologacion + " ";
     }
     return homologacion;
 }
 
 async function transformJson(tireElement, categorias, tags) {
-    console.warn(tireElement)
     return await new Promise((resolve, reject) => {
         var labelProduct = tireElement.ancho + '/' + tireElement.alto + 'R' + tireElement.rin + ' ' + tireElement.indiceCarga + tireElement.indiceVel + changeHomologacion(tireElement.homologacion) + " " + isRunflat(tireElement.aplicacion) + "<br><strong>" + tireElement.diseno + "</strong>";
         resolve({
+            "id_woocommerce": tireElement.id_woocommerce,
             "name": labelProduct,
             "sku": tireElement.idTire + "-" + tireElement.keyLlantacity,
             "stock_quantity": tireElement.existencia,
@@ -81,7 +93,8 @@ async function transformJson(tireElement, categorias, tags) {
             ],
             "images": [
                 {
-                    "src": constantes.URL_IMAGE_WOOCOMERCE + tireElement.image
+                    //"src": constantes.URL_IMAGE_WOOCOMERCE + tireElement.image
+                    "src": 'https://extyseg.com/wp-content/uploads/2019/04/EXTYSEG-imagen-no-disponible.jpg'
                 }
             ]
         })
@@ -105,6 +118,28 @@ async function getNextPages(page, tokenPulpo) {
             }
         }).then((allPages) => {
             resolve(allPages.data.data)
+        }).catch((err) => {
+            reject(err)
+        });
+    });
+}
+
+async function batchProducts(batchProductListCreate, batchProductListUpdate) {
+    var data = JSON.stringify({
+        "create": batchProductListCreate,
+        "update": batchProductListUpdate
+    })
+    const config = {
+        method: 'post',
+        url: constantes.URL_WOOCOMMERCE + 'wp-json/wc/v3/products/batch?consumer_key=' + constantes.consumer_key + '&consumer_secret=' + constantes.consumer_secret,
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        data: data
+    };        
+    return await new Promise((resolve, reject) => {
+        axios(config).then((batchProducts) => {
+            resolve(batchProducts)
         }).catch((err) => {
             reject(err)
         });
