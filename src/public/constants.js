@@ -16,5 +16,10 @@ module.exports = Object.freeze({
   MSG_GET: 'El registro se ha obtenido con éxito.',
 
   //URLS
-  URL_WOOCOMMERCE: 'https://llantacity.mx/beta/'
+  URL_WOOCOMMERCE: 'https://llantacity.mx/',
+  URL_IMAGE_WOOCOMERCE: 'https://llantacity.mx/uploads/tires/',
+
+  //KEYS_WOOCOMMERCE
+  consumer_key: 'ck_2aff7f6c3d548b93ee2a1611e097432fe863c3ba',
+  consumer_secret: 'cs_df1ed41d68bc304a71db467a883fc92110395791'
 });
