@@ -15,7 +15,7 @@ ruta.post('/insertDataInWooCommerce', (req, res) => {
         //GET ALL TAGS
         await getAllTags().then(async tags => {
             //GET FIRST TIRES
-            await Tires.getAllTiresPagination({ page: 1, limit: 10 }).then(async firtsTires => {
+            await Tires.getAllTiresPagination({ page: 1, limit: 9 }).then(async firtsTires => {
                 // ITERATE FIRSTS TIRES
                 for (var i = 0; i < firtsTires.tires.length; i++) {
                     var transformData = await transformJson(firtsTires.tires[i], categorias.data, tags.data)
@@ -26,7 +26,42 @@ ruta.post('/insertDataInWooCommerce', (req, res) => {
                     }
                 }
                 //UPDATE BATCH PRODUCTS
-                await batchProducts(batchProductListCreate, batchProductListUpdate).then(async batchData => {                    
+                await batchProducts(batchProductListCreate, batchProductListUpdate).then(async batchData => {
+                    var dataResponse = batchData.data
+                    //Itero los productos creados e inserto el id de woocommerce en mysql
+                    if (dataResponse.create != undefined) {
+                        for (var c = 0; c < dataResponse.create.length; c++) {
+                            if (dataResponse.create[c].error == undefined) {
+                                var arrayKey = dataResponse.create[c].sku.split("-");
+                                var params = {
+                                    id_woocommerce: dataResponse.create[c].id,
+                                    keyLlantacity: arrayKey[1] + "-" + arrayKey[2],
+                                    idTire: arrayKey[0]
+                                }
+                                await Tires.updateInCreate(params).then(idsProduct => {
+                                    console.warn("Se actualizaron los ids de woocommerce")
+                                }).catch((err) => {
+                                    return res.status(500).json(headers.getInternalErrorResponse(constantes.SERVER_ERROR, err));
+                                });
+                            }
+                        }
+                    }
+                    
+                    //Itero los productos actualizados e inserto el el lastupdate en mysql
+                    if (dataResponse.update != undefined) {
+                        for (var u = 0; u < dataResponse.update.length; u++) {
+                            if (dataResponse.update[u].error == undefined) {                                
+                                var params = {
+                                    id_woocommerce: dataResponse.update[u].id,                                    
+                                }
+                                await Tires.updateInUpdateWoocommerce(params).then(lastUpdateProduct => {
+                                    console.warn("Se actualizaron las fechas de actualizacion en woocommerce")
+                                }).catch((err) => {
+                                    return res.status(500).json(headers.getInternalErrorResponse(constantes.SERVER_ERROR, err));
+                                });
+                            }
+                        }
+                    }
                     res.json(headers.getSuccessResponse(constantes.BATCH_PRODUCT, null));
                 }).catch((err) => {
                     return res.status(500).json(headers.getInternalErrorResponse(constantes.SERVER_ERROR, err));
@@ -75,6 +110,7 @@ async function transformJson(tireElement, categorias, tags) {
         var labelProduct = tireElement.ancho + '/' + tireElement.alto + 'R' + tireElement.rin + ' ' + tireElement.indiceCarga + tireElement.indiceVel + changeHomologacion(tireElement.homologacion) + " " + isRunflat(tireElement.aplicacion) + "<br><strong>" + tireElement.diseno + "</strong>";
         resolve({
             "id_woocommerce": tireElement.id_woocommerce,
+            "id": tireElement.id_woocommerce,
             "name": labelProduct,
             "sku": tireElement.idTire + "-" + tireElement.keyLlantacity,
             "stock_quantity": tireElement.existencia,
@@ -136,7 +172,7 @@ async function batchProducts(batchProductListCreate, batchProductListUpdate) {
             'Content-Type': 'application/json'
         },
         data: data
-    };        
+    };
     return await new Promise((resolve, reject) => {
         axios(config).then((batchProducts) => {
             resolve(batchProducts)

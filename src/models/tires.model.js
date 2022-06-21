@@ -32,11 +32,35 @@ exports.getAllTiresPagination = async function (request) {
                             'total': quantity[0].cantidad,
                             'per_page': limit,
                             'current_page': page,
-                            'last_page': Number.isInteger(quantity[0].cantidad / limit) ? Math.round(quantity[0].cantidad / limit) : Math.round(quantity[0].cantidad / limit) + 1 
+                            'last_page': Number.isInteger(quantity[0].cantidad / limit) ? Math.round(quantity[0].cantidad / limit) : Math.round(quantity[0].cantidad / limit) + 1
                         }
                         return resolve({ pagination: jsonResult, tires: result });
                     }
                 });
+            }
+        });
+    });
+}
+
+exports.updateInCreate = async function (body) {
+    return await new Promise((resolve, reject) => {
+        dbConn.query("UPDATE t_tires SET id_woocommerce=?, last_update_woocommerce=? WHERE keyLlantacity = ? and idTire = ?", [body.id_woocommerce, new Date(), body.keyLlantacity, body.idTire], function (err, result) {
+            if (err) {
+                return reject(err);
+            } else {
+                return resolve(result);
+            }
+        });
+    });
+}
+
+exports.updateInUpdateWoocommerce = async function (body) {
+    return await new Promise((resolve, reject) => {
+        dbConn.query("UPDATE t_tires SET last_update_woocommerce=? WHERE id_woocommerce = ?", [new Date(), body.id_woocommerce], function (err, result) {
+            if (err) {
+                return reject(err);
+            } else {
+                return resolve(result);
             }
         });
     });
