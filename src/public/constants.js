@@ -20,7 +20,7 @@ module.exports = Object.freeze({
 
   //URLS
   URL_WOOCOMMERCE: 'https://llantacity.mx/',
-  URL_IMAGE_WOOCOMERCE: 'https://llantacity.mx/uploads/tires/',
+  URL_IMAGE_WOOCOMERCE: 'https://llantacity.mx/admin/uploads/tires/',
 
   //KEYS_WOOCOMMERCE
   consumer_key: 'ck_2aff7f6c3d548b93ee2a1611e097432fe863c3ba',

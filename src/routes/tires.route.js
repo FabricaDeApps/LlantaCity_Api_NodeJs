@@ -34,8 +34,7 @@ ruta.post('/insertDataInWooCommerce', (req, res) => {
                             if (dataResponse.create[c].error == undefined) {
                                 var arrayKey = dataResponse.create[c].sku.split("-");
                                 var params = {
-                                    id_woocommerce: dataResponse.create[c].id,
-                                    keyLlantacity: arrayKey[1] + "-" + arrayKey[2],
+                                    id_woocommerce: dataResponse.create[c].id,                                    
                                     idTire: arrayKey[0]
                                 }
                                 await Tires.updateInCreate(params).then(idsProduct => {
@@ -107,7 +106,7 @@ function changeHomologacion(prodHomologacion) {
 
 async function transformJson(tireElement, categorias, tags) {
     return await new Promise((resolve, reject) => {
-        var labelProduct = tireElement.ancho + '/' + tireElement.alto + 'R' + tireElement.rin + ' ' + tireElement.indiceCarga + tireElement.indiceVel + changeHomologacion(tireElement.homologacion) + " " + isRunflat(tireElement.aplicacion) + "<br><strong>" + tireElement.diseno + "</strong>";
+        var labelProduct = tireElement.ancho + '/' + tireElement.alto + 'R' + tireElement.rin + ' ' + tireElement.indiceCarga + tireElement.indiceVel + changeHomologacion(tireElement.homologacion) + " " + isRunflat(tireElement.aplicacion) + "<br><strong>" + tireElement.diseno + "</strong>";        
         resolve({
             "id_woocommerce": tireElement.id_woocommerce,
             "id": tireElement.id_woocommerce,
@@ -129,7 +128,7 @@ async function transformJson(tireElement, categorias, tags) {
             ],
             "images": [
                 {
-                    //"src": constantes.URL_IMAGE_WOOCOMERCE + tireElement.image
+                    //"src": constantes.URL_IMAGE_WOOCOMERCE + tireElement.image.replace('.webp', '.jpeg')
                     "src": 'https://extyseg.com/wp-content/uploads/2019/04/EXTYSEG-imagen-no-disponible.jpg'
                 }
             ]

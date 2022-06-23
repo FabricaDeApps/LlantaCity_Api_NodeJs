@@ -44,7 +44,7 @@ exports.getAllTiresPagination = async function (request) {
 
 exports.updateInCreate = async function (body) {
     return await new Promise((resolve, reject) => {
-        dbConn.query("UPDATE t_tires SET id_woocommerce=?, last_update_woocommerce=? WHERE keyLlantacity = ? and idTire = ?", [body.id_woocommerce, new Date(), body.keyLlantacity, body.idTire], function (err, result) {
+        dbConn.query("UPDATE t_tires SET id_woocommerce=?, last_update_woocommerce=? WHERE idTire = ?", [body.id_woocommerce, new Date(), body.idTire], function (err, result) {
             if (err) {
                 return reject(err);
             } else {
