@@ -4,67 +4,36 @@ const constantes = require('../public/constants');
 const Tires = require('../models/tires.model');
 const express = require('express')
 const ruta = express.Router()
-var async = require('async');
 const axios = require('axios');
 
 ruta.post('/insertDataInWooCommerce', (req, res) => {
-    var batchProductListCreate = []
-    var batchProductListUpdate = []
     //Get all categories
     getAllCategories().then(async categorias => {
         //GET ALL TAGS
         await getAllTags().then(async tags => {
             //GET FIRST TIRES
-            await Tires.getAllTiresPagination({ page: 1, limit: 9 }).then(async firtsTires => {
-                // ITERATE FIRSTS TIRES
-                for (var i = 0; i < firtsTires.tires.length; i++) {
-                    var transformData = await transformJson(firtsTires.tires[i], categorias.data, tags.data)
-                    if (transformData.id_woocommerce == null) {
-                        batchProductListCreate.push(transformData)
-                    } else {
-                        batchProductListUpdate.push(transformData)
-                    }
-                }
-                //UPDATE BATCH PRODUCTS
-                await batchProducts(batchProductListCreate, batchProductListUpdate).then(async batchData => {
-                    var dataResponse = batchData.data
-                    //Itero los productos creados e inserto el id de woocommerce en mysql
-                    if (dataResponse.create != undefined) {
-                        for (var c = 0; c < dataResponse.create.length; c++) {
-                            if (dataResponse.create[c].error == undefined) {
-                                var arrayKey = dataResponse.create[c].sku.split("-");
-                                var params = {
-                                    id_woocommerce: dataResponse.create[c].id,                                    
-                                    idTire: arrayKey[0]
+            await Tires.getAllTiresPagination({ page: 1, limit: 100 }).then(async firstTires => {
+                var lastPage = firstTires.pagination.last_page
+                //Bath first elements
+                await iterateArrayForBatch(firstTires.tires, categorias.data, tags.data).then(async responseT => {
+                    for (var i = 2; i <= lastPage; i++) {
+                        //Batch next all pages
+                        await Tires.getAllTiresPagination({ page: i, limit: 100 }).then(async allTires => {
+                            await iterateArrayForBatch(allTires.tires, categorias.data, tags.data).then(async responseTransform => {
+                                if (i == lastPage) {
+                                    res.json(headers.getSuccessResponse(constantes.BATCH_PRODUCT, null));
                                 }
-                                await Tires.updateInCreate(params).then(idsProduct => {
-                                    console.warn("Se actualizaron los ids de woocommerce")
-                                }).catch((err) => {
-                                    return res.status(500).json(headers.getInternalErrorResponse(constantes.SERVER_ERROR, err));
-                                });
-                            }
-                        }
+                            }).catch((err) => {
+                                return res.status(500).json(headers.getInternalErrorResponse(constantes.SERVER_ERROR, err));
+                            });
+                        }).catch((err) => {
+                            return res.status(500).json(headers.getInternalErrorResponse(constantes.SERVER_ERROR, err));
+                        });
                     }
-                    
-                    //Itero los productos actualizados e inserto el el lastupdate en mysql
-                    if (dataResponse.update != undefined) {
-                        for (var u = 0; u < dataResponse.update.length; u++) {
-                            if (dataResponse.update[u].error == undefined) {                                
-                                var params = {
-                                    id_woocommerce: dataResponse.update[u].id,                                    
-                                }
-                                await Tires.updateInUpdateWoocommerce(params).then(lastUpdateProduct => {
-                                    console.warn("Se actualizaron las fechas de actualizacion en woocommerce")
-                                }).catch((err) => {
-                                    return res.status(500).json(headers.getInternalErrorResponse(constantes.SERVER_ERROR, err));
-                                });
-                            }
-                        }
-                    }
-                    res.json(headers.getSuccessResponse(constantes.BATCH_PRODUCT, null));
                 }).catch((err) => {
                     return res.status(500).json(headers.getInternalErrorResponse(constantes.SERVER_ERROR, err));
                 });
+
             }).catch((err) => {
                 return res.status(500).json(headers.getInternalErrorResponse(constantes.SERVER_ERROR, err));
             });
@@ -76,21 +45,86 @@ ruta.post('/insertDataInWooCommerce', (req, res) => {
     });
 })
 
+async function iterateArrayForBatch(tires, categorias, tags) {
+    var batchProductListCreate = []
+    var batchProductListUpdate = []
+    return await new Promise(async (resolve, reject) => {
+        // TRANSFORM TIRES
+        for (var i = 0; i < tires.length; i++) {
+            var transformData = await transformJson(tires[i], categorias, tags)
+            if (transformData.id_woocommerce == null) {
+                batchProductListCreate.push(transformData)
+            } else {
+                batchProductListUpdate.push(transformData)
+            }
+        }
+
+        //BATCH PRODUCTS
+        await batchProducts(batchProductListCreate, batchProductListUpdate).then(async batchData => {
+            var dataResponse = batchData.data
+            //Itero los productos creados e inserto el id de woocommerce en mysql
+            if (dataResponse.create != undefined) {
+                for (var c = 0; c < dataResponse.create.length; c++) {
+                    if (dataResponse.create[c].error == undefined) {
+                        var arrayKey = dataResponse.create[c].sku.split("-");
+                        var params = {
+                            id_woocommerce: dataResponse.create[c].id,
+                            idTire: arrayKey[0]
+                        }
+                        await Tires.updateInCreate(params).then(idsProduct => {
+                            console.warn("Se actualizaron los ids de woocommerce")
+                        }).catch((err) => {
+                            reject(constantes.SERVER_ERROR, err)
+                        });
+                    }
+                }
+            }
+
+            //Itero los productos actualizados e inserto el el lastupdate en mysql
+            if (dataResponse.update != undefined) {
+                for (var u = 0; u < dataResponse.update.length; u++) {
+                    if (dataResponse.update[u].error == undefined) {
+                        var params = {
+                            id_woocommerce: dataResponse.update[u].id,
+                        }
+                        await Tires.updateInUpdateWoocommerce(params).then(lastUpdateProduct => {
+                            console.warn("Se actualizaron las fechas de actualizacion en woocommerce")
+                        }).catch((err) => {
+                            reject(constantes.SERVER_ERROR, err)
+                        });
+                    }
+                }
+            }
+            resolve(constantes.BATCH_PRODUCT)
+        }).catch((err) => {
+            reject(constantes.SERVER_ERROR, err)
+        });
+    });
+}
+
 function matchCategory(categorias, categoryMysql) {
-    var category = categorias.find(categoryD => categoryD.name.toLowerCase() == categoryMysql.toLowerCase())
-    if (category) {
-        return category.id
+    if (categoryMysql == null || categoryMysql == undefined) {
+        return null;
     } else {
-        return null
+        var category = categorias.find(categoryD => categoryD.name.toLowerCase() == categoryMysql.toLowerCase())
+        if (category) {
+            return category.id
+        } else {
+            return null
+        }
     }
 }
 
 function matchTag(tags, tagMysql) {
-    var tag = tags.find(tagD => tagD.name.toLowerCase() == tagMysql.toLowerCase())
-    if (tag) {
-        return tag.id
+    if (tagMysql == null || tagMysql == undefined) {
+        return null;
     } else {
-        return null
+        var tag = tags.find(tagD => tagD.name.toLowerCase() == tagMysql.toLowerCase())
+        if (tag) {
+            return tag.id
+        } else {
+            return null
+        }
     }
 }
 
@@ -106,7 +140,7 @@ function changeHomologacion(prodHomologacion) {
 
 async function transformJson(tireElement, categorias, tags) {
     return await new Promise((resolve, reject) => {
-        var labelProduct = tireElement.ancho + '/' + tireElement.alto + 'R' + tireElement.rin + ' ' + tireElement.indiceCarga + tireElement.indiceVel + changeHomologacion(tireElement.homologacion) + " " + isRunflat(tireElement.aplicacion) + "<br><strong>" + tireElement.diseno + "</strong>";        
+        var labelProduct = tireElement.ancho + '/' + tireElement.alto + 'R' + tireElement.rin + ' ' + tireElement.indiceCarga + tireElement.indiceVel + changeHomologacion(tireElement.homologacion) + " " + isRunflat(tireElement.aplicacion) + "<br><strong>" + tireElement.diseno + "</strong>";
         resolve({
             "id_woocommerce": tireElement.id_woocommerce,
             "id": tireElement.id_woocommerce,
@@ -128,8 +162,8 @@ async function transformJson(tireElement, categorias, tags) {
             ],
             "images": [
                 {
-                    //"src": constantes.URL_IMAGE_WOOCOMERCE + tireElement.image.replace('.webp', '.jpeg')
-                    "src": 'https://extyseg.com/wp-content/uploads/2019/04/EXTYSEG-imagen-no-disponible.jpg'
+                    "src": constantes.URL_IMAGE_WOOCOMERCE + tireElement.image.replace('.webp', '.jpeg')
+                    //"src": 'https://extyseg.com/wp-content/uploads/2019/04/EXTYSEG-imagen-no-disponible.jpg'
                 }
             ]
         })
@@ -137,26 +171,16 @@ async function transformJson(tireElement, categorias, tags) {
 }
 
 function isRunflat(aplicacion) {
-    let result = aplicacion.toLowerCase().includes("runflat");
-    if (result) {
-        return "Runflat";
+    if (aplicacion == null || aplicacion == undefined) {
+        return null;
     } else {
-        return "";
+        let result = aplicacion.toLowerCase().includes("runflat");
+        if (result) {
+            return "Runflat";
+        } else {
+            return "";
+        }
     }
-}
-
-async function getNextPages(page, tokenPulpo) {
-    return await new Promise((resolve, reject) => {
-        axios.get(constantes.URL_PULPO + 'service/api/v1/vehicles?page=' + page + '&size=500&sort=name', {
-            headers: {
-                'Authorization': 'Bearer ' + tokenPulpo
-            }
-        }).then((allPages) => {
-            resolve(allPages.data.data)
-        }).catch((err) => {
-            reject(err)
-        });
-    });
 }
 
 async function batchProducts(batchProductListCreate, batchProductListUpdate) {
