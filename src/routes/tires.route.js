@@ -165,6 +165,50 @@ async function transformJson(tireElement, categorias, tags) {
                     "src": constantes.URL_IMAGE_WOOCOMERCE + tireElement.image.replace('.webp', '.jpeg')
                     //"src": 'https://extyseg.com/wp-content/uploads/2019/04/EXTYSEG-imagen-no-disponible.jpg'
                 }
+            ],
+            "attributes": [
+                {
+                    "id": 2, 
+                    "position": 0,                   
+                    "options": tireElement.alto,
+                    "visible": true,
+                    "variation": true
+                },
+                {
+                    "id": 1, 
+                    "position": 0,                   
+                    "options": tireElement.ancho,
+                    "visible": true,
+                    "variation": true
+                },
+                {
+                    "id": 3, 
+                    "position": 0,                   
+                    "options": tireElement.rin,
+                    "visible": true,
+                    "variation": true
+                },
+                {
+                    "id": 4, 
+                    "position": 0,                   
+                    "options": tireElement.indiceCarga,
+                    "visible": true,
+                    "variation": true
+                },
+                {
+                    "id": 5, 
+                    "position": 0,                   
+                    "options": tireElement.indiceVel,
+                    "visible": true,
+                    "variation": true
+                },
+                {
+                    "id": 6, 
+                    "position": 0,                   
+                    "options": tireElement.aplicacion,
+                    "visible": true,
+                    "variation": true
+                }
             ]
         })
     });
