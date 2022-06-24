@@ -90,7 +90,7 @@ async function iterateArrayForBatch(tires, categorias, tags, pagina) {
                             id_woocommerce: dataResponse.update[u].id,
                         }
                         await Tires.updateInUpdateWoocommerce(params).then(lastUpdateProduct => {
-                            console.warn("(UPDATE) Se actualizo la fecha en MySql: " + params.id_woocommerce + " pagina: " + pagina)
+                            console.warn("(UPDATE) Se actualizo la fecha en MySql el idWoocomerce: " + params.id_woocommerce + " pagina: " + pagina)
                         }).catch((err) => {
                             reject(constantes.SERVER_ERROR, err)
                         });
