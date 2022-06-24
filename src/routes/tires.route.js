@@ -20,17 +20,16 @@ ruta.post('/insertDataInWooCommerce', async (req, res) => {
                         //Batch next all pages
                         await Tires.getAllTiresPagination({ page: i, limit: 100 }).then(async allTires => {
                             await iterateArrayForBatch(allTires.tires, categorias.data, tags.data, i).then(async responseTransform => {
-
+                                if (i == lastPage) {
+                                    console.warn("Termino exitosamente el proceso")
+                                    res.json(headers.getSuccessResponse(constantes.BATCH_PRODUCT, null));
+                                }
                             }).catch((err) => {
                                 return res.status(500).json(headers.getInternalErrorResponse(constantes.SERVER_ERROR, err));
                             });
                         }).catch((err) => {
                             return res.status(500).json(headers.getInternalErrorResponse(constantes.SERVER_ERROR, err));
-                        });
-                        if (i == lastPage) {
-                            console.warn("Termino exitosamente el proceso")
-                            res.json(headers.getSuccessResponse(constantes.BATCH_PRODUCT, null));
-                        }
+                        });                       
                     }
                 }).catch((err) => {
                     return res.status(500).json(headers.getInternalErrorResponse(constantes.SERVER_ERROR, err));

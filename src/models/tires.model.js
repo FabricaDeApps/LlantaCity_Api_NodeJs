@@ -20,11 +20,11 @@ exports.getAllTiresPagination = async function (request) {
         const page = request.page
         // calculate offset
         const offset = (page - 1) * limit
-        dbConn.query("Select * from t_tires where t_tires.active = 1 LIMIT " + limit + " OFFSET " + offset, function (err, result) {
+        dbConn.query("Select * from t_tires LIMIT " + limit + " OFFSET " + offset, function (err, result) {
             if (err) {
                 return reject(err);
             } else {
-                dbConn.query("SELECT COUNT(*) AS cantidad FROM t_tires where t_tires.active = 1", function (err, quantity) {
+                dbConn.query("SELECT COUNT(*) AS cantidad FROM t_tires", function (err, quantity) {
                     if (err) {
                         return reject(err);
                     } else {
