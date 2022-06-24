@@ -20,6 +20,7 @@ ruta.post('/insertDataInWooCommerce', async (req, res) => {
                         //Batch next all pages
                         await Tires.getAllTiresPagination({ page: i, limit: 100 }).then(async allTires => {
                             await iterateArrayForBatch(allTires.tires, categorias.data, tags.data, i).then(async responseTransform => {
+                                console.warn("Batch end page: " + i)
                                 if (i == lastPage) {
                                     console.warn("Termino exitosamente el proceso")
                                     res.json(headers.getSuccessResponse(constantes.BATCH_PRODUCT, null));
