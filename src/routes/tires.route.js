@@ -6,9 +6,9 @@ const express = require('express')
 const ruta = express.Router()
 const axios = require('axios');
 
-ruta.post('/insertDataInWooCommerce', (req, res) => {
+ruta.post('/insertDataInWooCommerce', async (req, res) => {
     //Get all categories
-    getAllCategories().then(async categorias => {
+    await getAllCategories().then(async categorias => {
         //GET ALL TAGS
         await getAllTags().then(async tags => {
             //GET FIRST TIRES
@@ -20,15 +20,16 @@ ruta.post('/insertDataInWooCommerce', (req, res) => {
                         //Batch next all pages
                         await Tires.getAllTiresPagination({ page: i, limit: 100 }).then(async allTires => {
                             await iterateArrayForBatch(allTires.tires, categorias.data, tags.data).then(async responseTransform => {
-                                if (i == lastPage) {
-                                    res.json(headers.getSuccessResponse(constantes.BATCH_PRODUCT, null));
-                                }
+                                
                             }).catch((err) => {
                                 return res.status(500).json(headers.getInternalErrorResponse(constantes.SERVER_ERROR, err));
                             });
                         }).catch((err) => {
                             return res.status(500).json(headers.getInternalErrorResponse(constantes.SERVER_ERROR, err));
                         });
+                        if (i == lastPage) {
+                            res.json(headers.getSuccessResponse(constantes.BATCH_PRODUCT, null));
+                        }
                     }
                 }).catch((err) => {
                     return res.status(500).json(headers.getInternalErrorResponse(constantes.SERVER_ERROR, err));
@@ -141,6 +142,7 @@ function changeHomologacion(prodHomologacion) {
 async function transformJson(tireElement, categorias, tags) {
     return await new Promise((resolve, reject) => {
         var labelProduct = tireElement.ancho + '/' + tireElement.alto + 'R' + tireElement.rin + ' ' + tireElement.indiceCarga + tireElement.indiceVel + changeHomologacion(tireElement.homologacion) + " " + isRunflat(tireElement.aplicacion) + "<br><strong>" + tireElement.diseno + "</strong>";
+        var image = tireElement.image.split('.')
         resolve({
             "id_woocommerce": tireElement.id_woocommerce,
             "id": tireElement.id_woocommerce,
@@ -162,49 +164,49 @@ async function transformJson(tireElement, categorias, tags) {
             ],
             "images": [
                 {
-                    "src": constantes.URL_IMAGE_WOOCOMERCE + tireElement.image.replace('.webp', '.jpeg')
+                    "src": constantes.URL_IMAGE_WOOCOMERCE + image[0] + '.jpeg'
                     //"src": 'https://extyseg.com/wp-content/uploads/2019/04/EXTYSEG-imagen-no-disponible.jpg'
                 }
             ],
             "attributes": [
                 {
-                    "id": 2, 
-                    "position": 0,                   
+                    "id": 2,
+                    "position": 0,
                     "options": tireElement.alto,
                     "visible": true,
                     "variation": true
                 },
                 {
-                    "id": 1, 
-                    "position": 0,                   
+                    "id": 1,
+                    "position": 0,
                     "options": tireElement.ancho,
                     "visible": true,
                     "variation": true
                 },
                 {
-                    "id": 3, 
-                    "position": 0,                   
+                    "id": 3,
+                    "position": 0,
                     "options": tireElement.rin,
                     "visible": true,
                     "variation": true
                 },
                 {
-                    "id": 4, 
-                    "position": 0,                   
+                    "id": 4,
+                    "position": 0,
                     "options": tireElement.indiceCarga,
                     "visible": true,
                     "variation": true
                 },
                 {
-                    "id": 5, 
-                    "position": 0,                   
+                    "id": 5,
+                    "position": 0,
                     "options": tireElement.indiceVel,
                     "visible": true,
                     "variation": true
                 },
                 {
-                    "id": 6, 
-                    "position": 0,                   
+                    "id": 6,
+                    "position": 0,
                     "options": tireElement.aplicacion,
                     "visible": true,
                     "variation": true
@@ -251,7 +253,7 @@ async function batchProducts(batchProductListCreate, batchProductListUpdate) {
 
 async function getAllCategories() {
     return await new Promise((resolve, reject) => {
-        axios.get(constantes.URL_WOOCOMMERCE + 'wp-json/wc/v3/products/categories?consumer_key=' + constantes.consumer_key + '&consumer_secret=' + constantes.consumer_secret, {
+        axios.get(constantes.URL_WOOCOMMERCE + 'wp-json/wc/v3/products/categories?consumer_key=' + constantes.consumer_key + '&consumer_secret=' + constantes.consumer_secret + "&per_page=" + constantes.PER_PAGE, {
         }).then((allCategories) => {
             resolve(allCategories)
         }).catch((err) => {
@@ -262,7 +264,7 @@ async function getAllCategories() {
 
 async function getAllTags() {
     return await new Promise((resolve, reject) => {
-        axios.get(constantes.URL_WOOCOMMERCE + 'wp-json/wc/v3/products/tags?consumer_key=' + constantes.consumer_key + '&consumer_secret=' + constantes.consumer_secret, {
+        axios.get(constantes.URL_WOOCOMMERCE + 'wp-json/wc/v3/products/tags?consumer_key=' + constantes.consumer_key + '&consumer_secret=' + constantes.consumer_secret + "&per_page=" + constantes.PER_PAGE, {
         }).then((allTags) => {
             resolve(allTags)
         }).catch((err) => {

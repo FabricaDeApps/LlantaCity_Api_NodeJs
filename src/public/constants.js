@@ -17,6 +17,7 @@ module.exports = Object.freeze({
 
   //PRODUCTS BACTH
   BATCH_PRODUCT: 'Registros actualizados en WooCommerce',
+  PER_PAGE: 50,
 
   //URLS
   URL_WOOCOMMERCE: 'https://llantacity.mx/',
