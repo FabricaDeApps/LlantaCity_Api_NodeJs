@@ -15,12 +15,12 @@ ruta.post('/insertDataInWooCommerce', async (req, res) => {
             await Tires.getAllTiresPagination({ page: 1, limit: 100 }).then(async firstTires => {
                 var lastPage = firstTires.pagination.last_page
                 //Bath first elements
-                await iterateArrayForBatch(firstTires.tires, categorias.data, tags.data).then(async responseT => {
+                await iterateArrayForBatch(firstTires.tires, categorias.data, tags.data, 1).then(async responseT => {
                     for (var i = 2; i <= lastPage; i++) {
                         //Batch next all pages
                         await Tires.getAllTiresPagination({ page: i, limit: 100 }).then(async allTires => {
-                            await iterateArrayForBatch(allTires.tires, categorias.data, tags.data).then(async responseTransform => {
-                                
+                            await iterateArrayForBatch(allTires.tires, categorias.data, tags.data, i).then(async responseTransform => {
+
                             }).catch((err) => {
                                 return res.status(500).json(headers.getInternalErrorResponse(constantes.SERVER_ERROR, err));
                             });
@@ -28,6 +28,7 @@ ruta.post('/insertDataInWooCommerce', async (req, res) => {
                             return res.status(500).json(headers.getInternalErrorResponse(constantes.SERVER_ERROR, err));
                         });
                         if (i == lastPage) {
+                            console.warn("Termino exitosamente el proceso")
                             res.json(headers.getSuccessResponse(constantes.BATCH_PRODUCT, null));
                         }
                     }
@@ -46,7 +47,7 @@ ruta.post('/insertDataInWooCommerce', async (req, res) => {
     });
 })
 
-async function iterateArrayForBatch(tires, categorias, tags) {
+async function iterateArrayForBatch(tires, categorias, tags, pagina) {
     var batchProductListCreate = []
     var batchProductListUpdate = []
     return await new Promise(async (resolve, reject) => {
@@ -73,7 +74,7 @@ async function iterateArrayForBatch(tires, categorias, tags) {
                             idTire: arrayKey[0]
                         }
                         await Tires.updateInCreate(params).then(idsProduct => {
-                            console.warn("Se actualizaron los ids de woocommerce")
+                            console.warn("(CREATE) Se actualizo en MySql el idWoocomerce: " + params.id_woocommerce + " pagina: " + pagina)
                         }).catch((err) => {
                             reject(constantes.SERVER_ERROR, err)
                         });
@@ -89,7 +90,7 @@ async function iterateArrayForBatch(tires, categorias, tags) {
                             id_woocommerce: dataResponse.update[u].id,
                         }
                         await Tires.updateInUpdateWoocommerce(params).then(lastUpdateProduct => {
-                            console.warn("Se actualizaron las fechas de actualizacion en woocommerce")
+                            console.warn("(UPDATE) Se actualizo la fecha en MySql: " + params.id_woocommerce + " pagina: " + pagina)
                         }).catch((err) => {
                             reject(constantes.SERVER_ERROR, err)
                         });
@@ -142,7 +143,13 @@ function changeHomologacion(prodHomologacion) {
 async function transformJson(tireElement, categorias, tags) {
     return await new Promise((resolve, reject) => {
         var labelProduct = tireElement.ancho + '/' + tireElement.alto + 'R' + tireElement.rin + ' ' + tireElement.indiceCarga + tireElement.indiceVel + changeHomologacion(tireElement.homologacion) + " " + isRunflat(tireElement.aplicacion) + "<br><strong>" + tireElement.diseno + "</strong>";
-        var image = tireElement.image.split('.')
+        var image = ""
+        if (tireElement.image == null || tireElement == undefined || tireElement.image == "") {
+            image = "https://extyseg.com/wp-content/uploads/2019/04/EXTYSEG-imagen-no-disponible.jpg"
+        } else {
+            var splitImage = tireElement.image.split('.')
+            image = constantes.URL_IMAGE_WOOCOMERCE + splitImage[0] + '.jpeg'
+        }
         resolve({
             "id_woocommerce": tireElement.id_woocommerce,
             "id": tireElement.id_woocommerce,
@@ -164,7 +171,7 @@ async function transformJson(tireElement, categorias, tags) {
             ],
             "images": [
                 {
-                    "src": constantes.URL_IMAGE_WOOCOMERCE + image[0] + '.jpeg'
+                    "src": image
                     //"src": 'https://extyseg.com/wp-content/uploads/2019/04/EXTYSEG-imagen-no-disponible.jpg'
                 }
             ],
