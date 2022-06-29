@@ -7,6 +7,8 @@ const ruta = express.Router()
 const axios = require('axios');
 const excel = require('exceljs');
 var dateFormat = require('dateformat');
+const uploadFile = require("../public/uploadExcel");
+const readXlsxFile = require('read-excel-file/node')
 
 ruta.post('/insertDataInWooCommerce', async (req, res) => {
     //Get all categories
@@ -365,5 +367,30 @@ ruta.get('/getExcelTires', async (req, res) => {
         return res.status(500).json(headers.getInternalErrorResponse(constantes.SERVER_ERROR, err));
     });
 })
+
+ruta.post('/importTires', async (req, res) => {
+    uploadFile(req, res, function (err) {
+        if (err) {
+            if (err.code === 'filetype') {
+                return res.send(headers.getBadErrorResponse(constantes.EXTENSION_NOT_MATCH))
+            } else {
+                return res.status(500).json(headers.getInternalErrorResponse(constantes.EXCEL_NOT_UPLOAD + req.file.originalname + "." + err));
+            }
+        } else {
+            if (req.file == undefined) {
+                return res.status(500).send(headers.getBadErrorResponse(constantes.NOT_EXCEL_FILES));
+            }
+            var pathExcel = req.file.path
+            // File path.
+            readXlsxFile(pathExcel).then((rows) => {
+                // `rows` is an array of rows
+                // each row being an array of cells.                
+                console.warn(rows)
+            })
+            res.json(headers.getSuccessResponse(constantes.BATCH_PRODUCT, null));
+        }
+    });
+})
+
 
 module.exports = ruta

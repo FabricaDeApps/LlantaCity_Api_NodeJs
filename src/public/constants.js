@@ -19,6 +19,12 @@ module.exports = Object.freeze({
   BATCH_PRODUCT: 'Registros actualizados en WooCommerce',
   PER_PAGE: 50,
 
+  //PRODUCTS EXCEL UPLOAD
+  EXCEL_FILES: '/files/excel/',
+  EXTENSION_NOT_MATCH: "La extensión del archivo no es valida.",
+  NOT_EXCEL_FILES: "El archivo excel es requerido.",
+  EXCEL_NOT_UPLOAD: "No fue posible leer el archivo por estas razones: ",
+
   //URLS
   URL_WOOCOMMERCE: 'https://llantacity.mx/',
   URL_IMAGE_WOOCOMERCE: 'https://llantacity.mx/admin/uploads/tires/',
