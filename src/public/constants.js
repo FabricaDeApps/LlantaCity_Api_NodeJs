@@ -18,8 +18,9 @@ module.exports = Object.freeze({
   //PRODUCTS BACTH
   BATCH_PRODUCT: 'Registros actualizados en WooCommerce',
   PER_PAGE: 50,
-
+  
   //PRODUCTS EXCEL UPLOAD
+  TIRES_EXCEL_LOAD: 'Se cargo exitosamente los registros del Excel en Mysql.',
   EXCEL_FILES: '/files/excel/',
   EXTENSION_NOT_MATCH: "La extensión del archivo no es valida.",
   NOT_EXCEL_FILES: "El archivo excel es requerido.",

@@ -385,12 +385,75 @@ ruta.post('/importTires', async (req, res) => {
             readXlsxFile(pathExcel).then((rows) => {
                 // `rows` is an array of rows
                 // each row being an array of cells.                
-                console.warn(rows)
+                rows.forEach(async function (row, i) {
+                    if (i > 0) {
+                        var params = {
+                            idTire: row[0],
+                            keyLlantacity: row[1],
+                            codigo: row[2],
+                            categoria: row[3],
+                            marca: row[4],
+                            ancho: row[5],
+                            alto: row[6],
+                            rin: row[7],
+                            diseno: row[8],
+                            clasZR: row[9],
+                            indiceCarga: row[10],
+                            indiceVel: row[11],
+                            aplicacion: row[12],
+                            charge: row[13],
+                            homologacion: row[14],
+                            costo: row[15],
+                            existencia: row[16],
+                            image: row[17],
+                            idProveedor: row[18],
+                            pesoVolumetrico: row[19],
+                            temperatura: row[20],
+                            traccion: row[21],
+                            treadwear: row[22],
+                            estilo: row[23],
+                            caracteristica: row[24],
+                            tipoIdentificacion: row[25],
+                            numeroIdentificacion: row[26],
+                            garantiaAnos: row[27],
+                            paisEnvio: row[28],
+                            tipoVehiculo: row[29],
+                            descripcionCorta: row[30],
+                            diametroTotal: row[31],
+                            altoTotal: row[32]
+                        }
+                        params.idTire + "".trim()
+                        if (params.idTire == "" || params.idTire == null) {
+                            //Crear nuevo registro de llanta                            
+                            delete params['idTire'];
+                            params.keyLlantacity = params.marca.substring(0, 3) + params.ancho + params.alto + params.rin + getDiseno(params.diseno) + params.indiceCarga + params.indiceVel + "-" + params.idProveedor
+                            await Tires.addNewTires(params).then(create => {
+                                console.log("Registro creado con el idTire: ", create)
+                            }).catch((err) => {
+                                console.warn("Ocurrio un error al insertar: ", err)
+                            });
+                        } else {
+                            //Actualizar registro de llanta                                                        
+                            await Tires.updateTires(params).then(update => {
+                                console.log("Registro actualizado por el idTire: ", params.idTire)
+                            }).catch((err) => {
+                                console.warn("Ocurrio un error al actualizar: ", err)
+                            });
+                        }
+                    }
+                })
             })
-            res.json(headers.getSuccessResponse(constantes.BATCH_PRODUCT, null));
+            res.json(headers.getSuccessResponse(constantes.TIRES_EXCEL_LOAD, null));
         }
     });
 })
 
-
+function getDiseno(diseno) {
+    var disenoConcat = ""
+    var disenoSplit = diseno.split(" ")
+    disenoSplit.forEach(dis => {
+        disenoConcat += dis.substring(0, 2)
+    })
+    return disenoConcat
+}
 module.exports = ruta

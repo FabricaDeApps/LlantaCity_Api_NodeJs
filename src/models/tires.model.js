@@ -42,6 +42,7 @@ exports.getAllTiresPagination = async function (request) {
     });
 }
 
+//From woocomerce response
 exports.updateInCreate = async function (body) {
     return await new Promise((resolve, reject) => {
         dbConn.query("UPDATE t_tires SET id_woocommerce=?, last_update_woocommerce=? WHERE idTire = ?", [body.id_woocommerce, new Date(), body.idTire], function (err, result) {
@@ -54,6 +55,7 @@ exports.updateInCreate = async function (body) {
     });
 }
 
+//From woocomerce response
 exports.updateInUpdateWoocommerce = async function (body) {
     return await new Promise((resolve, reject) => {
         dbConn.query("UPDATE t_tires SET last_update_woocommerce=? WHERE id_woocommerce = ?", [new Date(), body.id_woocommerce], function (err, result) {
@@ -61,6 +63,33 @@ exports.updateInUpdateWoocommerce = async function (body) {
                 return reject(err);
             } else {
                 return resolve(result);
+            }
+        });
+    });
+}
+
+//Update tires from excel
+exports.updateTires = async function (body) {
+    return await new Promise((resolve, reject) => {
+        dbConn.query("UPDATE t_tires SET codigo=?, categoria=?, marca=?, ancho=?, alto=?, rin=?, diseno=?, clasZR=?, indiceCarga=?, indiceVel=?, aplicacion=?, charge=?, homologacion=?, costo=?, existencia=?, image=?, createdTime=?, idProveedor=?, pesoVolumetrico=?, temperatura=?, traccion=?, treadwear=?, estilo=?, caracteristica=?, tipoIdentificacion=?, numeroIdentificacion=?, garantiaAnos=?, paisEnvio=?, tipoVehiculo=?, descripcionCorta=?, diametroTotal=?, altoTotal=? WHERE idTire = ?", 
+        [body.codigo, body.categoria, body.marca, body.ancho, body.alto, body.rin, body.diseno, body.clasZR, body.indiceCarga, body.indiceVel, body.aplicacion, body.charge, body.homologacion, body.costo, body.existencia, body.image, new Date(), body.idProveedor, body.pesoVolumetrico, body.temperatura, body.traccion, body.treadwear, body.estilo, body.caracteristica, body.tipoIdentificacion, body.numeroIdentificacion, body.garantiaAnos, body.paisEnvio, body.tipoVehiculo, body.descripcionCorta, body.diametroTotal, body.altoTotal, body.idTire], function (err, result) {
+            if (err) {
+                return reject(err);
+            } else {
+                return resolve(result);
+            }
+        });
+    });
+}
+
+//Insert new tires
+exports.addNewTires = async function (body) {
+    return await new Promise((resolve, reject) => {
+        dbConn.query("INSERT INTO t_tires set ?", body, (err, result) => {
+            if (err) {
+                return reject(err);
+            } else {
+                return resolve(result.insertId);
             }
         });
     });
