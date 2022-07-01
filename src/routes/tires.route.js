@@ -451,13 +451,14 @@ ruta.post('/importTires', async (req, res) => {
                             });
                         }
                         if(i == rows.length -1){
-                            console.warn("Termina el proceso...") 
                             endProcess = true                         
+                            console.warn("Termina el proceso...") 
                         }
                     }                    
                 })
                 if(endProcess == true){
-                    res.json(headers.getSuccessResponse(constantes.TIRES_EXCEL_LOAD, null));
+                    console.warn("Aqui llega")
+                    return res.json(headers.getSuccessResponse(constantes.TIRES_EXCEL_LOAD, null));
                 }
             })
             
