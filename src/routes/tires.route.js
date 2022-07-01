@@ -449,11 +449,11 @@ ruta.post('/importTires', async (req, res) => {
                                 console.warn("Ocurrio un error al actualizar: ", err)
                             });
                         }
-                    }
-                    if(i == rows.length -1){
-                        console.warn("Termina el proceso...")
-                        res.json(headers.getSuccessResponse(constantes.TIRES_EXCEL_LOAD, null));
-                    }
+                        if(i == rows.length -1){
+                            console.warn("Termina el proceso...")
+                            res.json(headers.getSuccessResponse(constantes.TIRES_EXCEL_LOAD, null));
+                        }
+                    }                    
                 })
             })
         }
