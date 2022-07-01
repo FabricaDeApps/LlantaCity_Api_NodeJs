@@ -382,10 +382,10 @@ ruta.post('/importTires', async (req, res) => {
             }
             var pathExcel = req.file.path
             // File path.
-            readXlsxFile(pathExcel).then((rows) => {
+            readXlsxFile(pathExcel).then(async (rows) => {
                 // `rows` is an array of rows
                 // each row being an array of cells.                
-                rows.forEach(async function (row, i) {
+                await rows.forEach(async function (row, i) {
                     if (i > 0) {
                         var params = {
                             idTire: row[0],
