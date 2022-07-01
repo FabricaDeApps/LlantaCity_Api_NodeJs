@@ -388,16 +388,15 @@ ruta.post('/importTires', async (req, res) => {
                 /* rows.forEach(async function (row, i) { */
                 for (var i = 0; i < rows.length; i++) {                    
                     if (i > 0) {
-                        await insertOrUpdateTire(rows[i], i).then(indxR => {
-                            console.warn(indxR)
+                        await insertOrUpdateTire(rows[i], i).then(indxR => {                            
                             if (indxR == rows.length - 1) {
-                                console.warn("Termina el proceso...")
-                                res.json(headers.getSuccessResponse(constantes.TIRES_EXCEL_LOAD, null));
+                                console.warn("Termina el proceso...")                                
                             }
                         })
                     }
                 }
             })
+            res.json(headers.getSuccessResponse(constantes.TIRES_EXCEL_LOAD, null));
 
         }
     });
