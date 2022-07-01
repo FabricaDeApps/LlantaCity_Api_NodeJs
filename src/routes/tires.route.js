@@ -369,8 +369,7 @@ ruta.get('/getExcelTires', async (req, res) => {
 })
 
 ruta.post('/importTires', async (req, res) => {
-    uploadFile(req, res, async function (err) {
-        var endProcess = false
+    uploadFile(req, res, async function (err) {        
         if (err) {
             if (err.code === 'filetype') {
                 return res.send(headers.getBadErrorResponse(constantes.EXTENSION_NOT_MATCH))
@@ -387,8 +386,8 @@ ruta.post('/importTires', async (req, res) => {
                 // `rows` is an array of rows
                 // each row being an array of cells.                
                 await rows.forEach(async function (row, i) {
-                    await insertOrUpdateTire(row, i).then(idx => {
-                        if (idx == rows.length - 1) {
+                    await insertOrUpdateTire(row, i).then(id => {
+                        if (id == rows.length - 1) {
                             console.warn("Termina el proceso...")
                             res.json(headers.getSuccessResponse(constantes.TIRES_EXCEL_LOAD, null));
                         }
