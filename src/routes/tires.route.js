@@ -369,6 +369,7 @@ ruta.get('/getExcelTires', async (req, res) => {
 })
 
 ruta.post('/importTires', async (req, res) => {
+    var endProcess = false
     uploadFile(req, res, function (err) {
         if (err) {
             if (err.code === 'filetype') {
@@ -450,12 +451,15 @@ ruta.post('/importTires', async (req, res) => {
                             });
                         }
                         if(i == rows.length -1){
-                            console.warn("Termina el proceso...")
-                            res.json(headers.getSuccessResponse(constantes.TIRES_EXCEL_LOAD, null));
+                            console.warn("Termina el proceso...") 
+                            endProcess = true                         
                         }
                     }                    
                 })
             })
+            if(endProcess == true){
+                res.json(headers.getSuccessResponse(constantes.TIRES_EXCEL_LOAD, null));
+            }
         }
     });
 })
