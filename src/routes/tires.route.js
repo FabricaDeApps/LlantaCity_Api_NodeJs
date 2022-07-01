@@ -389,6 +389,7 @@ ruta.post('/importTires', async (req, res) => {
                 for (var i = 0; i < rows.length; i++) {                    
                     if (i > 0) {
                         await insertOrUpdateTire(rows[i], i).then(indxR => {
+                            console.warn(indxR)
                             if (indxR == rows.length - 1) {
                                 console.warn("Termina el proceso...")
                                 res.json(headers.getSuccessResponse(constantes.TIRES_EXCEL_LOAD, null));
