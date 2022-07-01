@@ -369,7 +369,7 @@ ruta.get('/getExcelTires', async (req, res) => {
 })
 
 ruta.post('/importTires', async (req, res) => {
-    uploadFile(req, res, async function (err) {        
+    uploadFile(req, res, async function (err) {
         if (err) {
             if (err.code === 'filetype') {
                 return res.send(headers.getBadErrorResponse(constantes.EXTENSION_NOT_MATCH))
@@ -385,14 +385,17 @@ ruta.post('/importTires', async (req, res) => {
             await readXlsxFile(pathExcel).then(async (rows) => {
                 // `rows` is an array of rows
                 // each row being an array of cells.                
-                await rows.forEach(async function (row, i) {
-                    await insertOrUpdateTire(row, i).then(id => {
-                        if (id == rows.length - 1) {
-                            console.warn("Termina el proceso...")
-                            res.json(headers.getSuccessResponse(constantes.TIRES_EXCEL_LOAD, null));
-                        }
-                    })
-                })
+                /* rows.forEach(async function (row, i) { */
+                for (var i = 0; i < rows.length; i++) {                    
+                    if (i > 0) {
+                        await insertOrUpdateTire(rows[i], i).then(indxR => {
+                            if (indxR == rows.length - 1) {
+                                console.warn("Termina el proceso...")
+                                res.json(headers.getSuccessResponse(constantes.TIRES_EXCEL_LOAD, null));
+                            }
+                        })
+                    }
+                }
             })
 
         }
@@ -401,75 +404,74 @@ ruta.post('/importTires', async (req, res) => {
 
 async function insertOrUpdateTire(row, i) {
     return await new Promise(async (resolve, reject) => {
-        if (i > 0) {
-            var params = {
-                idTire: row[0],
-                keyLlantacity: row[1],
-                codigo: row[2],
-                categoria: row[3] == null ? null : row[3].toUpperCase(),
-                marca: row[4] == null ? null : row[4].toUpperCase(),
-                ancho: row[5],
-                alto: row[6],
-                rin: row[7],
-                diseno: row[8] == null ? null : row[8].toUpperCase(),
-                clasZR: row[9],
-                indiceCarga: row[10],
-                indiceVel: row[11],
-                aplicacion: row[12] == null ? null : row[12].toUpperCase(),
-                charge: row[13],
-                homologacion: row[14],
-                costo: row[15],
-                existencia: row[16],
-                image: row[17],
-                idProveedor: row[18],
-                pesoVolumetrico: row[19],
-                temperatura: row[20],
-                traccion: row[21],
-                treadwear: row[22],
-                estilo: row[23],
-                caracteristica: row[24],
-                tipoIdentificacion: row[25],
-                numeroIdentificacion: row[26],
-                garantiaAnos: row[27],
-                paisEnvio: row[28],
-                tipoVehiculo: row[29],
-                descripcionCorta: row[30],
-                diametroTotal: row[31],
-                altoTotal: row[32]
-            }
-            params.idTire + "".trim()
-            if (params.idTire == "" || params.idTire == null || params.idTire == undefined) {
-                //Crear nuevo registro de llanta                            
-                delete params['idTire'];
-                params.keyLlantacity = params.marca.substring(0, 3) + params.ancho + params.alto + params.rin + getDisenoForKey(params.diseno) + params.indiceCarga + params.indiceVel + "-" + params.idProveedor
-                await Tires.getImageFromDiseno(params.diseno).then(async tireByDiseno => {
-                    if (tireByDiseno.length > 0) {
-                        params.image = tireByDiseno[0].image
-                    } else {
-                        params.image = null
-                    }
-                    await Tires.addNewTires(params).then(create => {
-                        console.log("Registro creado con el idTire: ", create)
-                        resolve(i)
-                    }).catch((err) => {
-                        console.warn("Ocurrio un error al insertar: ", err)
-                        resolve(i)
-                    });
-                }).catch((err) => {
-                    console.warn("Ocurrio un error al obtener la imagen: ", err)
-                    resolve(i)
-                });
-            } else {
-                //Actualizar registro de llanta                                                        
-                await Tires.updateTires(params).then(update => {
-                    console.log("Registro actualizado por el idTire: ", params.idTire)
-                    resolve(i)
-                }).catch((err) => {
-                    console.warn("Ocurrio un error al actualizar: ", err)
-                    resolve(i)
-                });
-            }
+        var params = {
+            idTire: row[0],
+            keyLlantacity: row[1],
+            codigo: row[2],
+            categoria: row[3] == null ? null : row[3].toUpperCase(),
+            marca: row[4] == null ? null : row[4].toUpperCase(),
+            ancho: row[5],
+            alto: row[6],
+            rin: row[7],
+            diseno: row[8] == null ? null : row[8].toUpperCase(),
+            clasZR: row[9],
+            indiceCarga: row[10],
+            indiceVel: row[11],
+            aplicacion: row[12] == null ? null : row[12].toUpperCase(),
+            charge: row[13],
+            homologacion: row[14],
+            costo: row[15],
+            existencia: row[16],
+            image: row[17],
+            idProveedor: row[18],
+            pesoVolumetrico: row[19],
+            temperatura: row[20],
+            traccion: row[21],
+            treadwear: row[22],
+            estilo: row[23],
+            caracteristica: row[24],
+            tipoIdentificacion: row[25],
+            numeroIdentificacion: row[26],
+            garantiaAnos: row[27],
+            paisEnvio: row[28],
+            tipoVehiculo: row[29],
+            descripcionCorta: row[30],
+            diametroTotal: row[31],
+            altoTotal: row[32]
         }
+        params.idTire + "".trim()
+        if (params.idTire == "" || params.idTire == null || params.idTire == undefined) {
+            //Crear nuevo registro de llanta                            
+            delete params['idTire'];
+            params.keyLlantacity = params.marca.substring(0, 3) + params.ancho + params.alto + params.rin + getDisenoForKey(params.diseno) + params.indiceCarga + params.indiceVel + "-" + params.idProveedor
+            await Tires.getImageFromDiseno(params.diseno).then(async tireByDiseno => {
+                if (tireByDiseno.length > 0) {
+                    params.image = tireByDiseno[0].image
+                } else {
+                    params.image = null
+                }
+                await Tires.addNewTires(params).then(create => {
+                    console.log("Registro creado con el idTire: ", create)
+                    resolve(i)
+                }).catch((err) => {
+                    console.warn("Ocurrio un error al insertar: ", err)
+                    resolve(i)
+                });
+            }).catch((err) => {
+                console.warn("Ocurrio un error al obtener la imagen: ", err)
+                resolve(i)
+            });
+        } else {
+            //Actualizar registro de llanta                                                        
+            await Tires.updateTires(params).then(update => {
+                console.log("Registro actualizado por el idTire: ", params.idTire)
+                resolve(i)
+            }).catch((err) => {
+                console.warn("Ocurrio un error al actualizar: ", err)
+                resolve(i)
+            });
+        }
+
     });
 }
 
