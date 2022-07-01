@@ -13,6 +13,18 @@ exports.getAllTires = async function () {
     });
 }
 
+exports.getImageFromDiseno = async function (diseno) {
+    return await new Promise((resolve, reject) => {
+        dbConn.query("SELECT *  FROM t_tires WHERE diseno LIKE ? LIMIT 0,1", diseno, function (err, result) {
+            if (err) {
+                return reject(err);
+            } else {
+                return resolve(result);
+            }
+        });
+    });
+}
+
 exports.getAllTiresPagination = async function (request) {
     return await new Promise((resolve, reject) => {
         const limit = request.limit

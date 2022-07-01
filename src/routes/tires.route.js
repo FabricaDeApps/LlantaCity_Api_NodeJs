@@ -391,16 +391,16 @@ ruta.post('/importTires', async (req, res) => {
                             idTire: row[0],
                             keyLlantacity: row[1],
                             codigo: row[2],
-                            categoria: row[3],
-                            marca: row[4],
+                            categoria: row[3].toUpperCase(),
+                            marca: row[4].toUpperCase(),
                             ancho: row[5],
                             alto: row[6],
                             rin: row[7],
-                            diseno: row[8],
+                            diseno: row[8].toUpperCase(),
                             clasZR: row[9],
                             indiceCarga: row[10],
                             indiceVel: row[11],
-                            aplicacion: row[12],
+                            aplicacion: row[12].toUpperCase(),
                             charge: row[13],
                             homologacion: row[14],
                             costo: row[15],
@@ -423,14 +423,23 @@ ruta.post('/importTires', async (req, res) => {
                             altoTotal: row[32]
                         }
                         params.idTire + "".trim()
-                        if (params.idTire == "" || params.idTire == null) {
+                        if (params.idTire == "" || params.idTire == null || params.idTire == undefined) {
                             //Crear nuevo registro de llanta                            
                             delete params['idTire'];
-                            params.keyLlantacity = params.marca.substring(0, 3) + params.ancho + params.alto + params.rin + getDiseno(params.diseno) + params.indiceCarga + params.indiceVel + "-" + params.idProveedor
-                            await Tires.addNewTires(params).then(create => {
-                                console.log("Registro creado con el idTire: ", create)
+                            params.keyLlantacity = params.marca.substring(0, 3) + params.ancho + params.alto + params.rin + getDisenoForKey(params.diseno) + params.indiceCarga + params.indiceVel + "-" + params.idProveedor
+                            await Tires.getImageFromDiseno(params.diseno).then(async tireByDiseno => {
+                                if(tireByDiseno.length > 0){
+                                    params.image = tireByDiseno[0].image
+                                } else{
+                                    params.image = null
+                                }
+                                await Tires.addNewTires(params).then(create => {
+                                    console.log("Registro creado con el idTire: ", create)
+                                }).catch((err) => {
+                                    console.warn("Ocurrio un error al insertar: ", err)
+                                });
                             }).catch((err) => {
-                                console.warn("Ocurrio un error al insertar: ", err)
+                                console.warn("Ocurrio un error al obtener la imagen: ", err)
                             });
                         } else {
                             //Actualizar registro de llanta                                                        
@@ -448,7 +457,7 @@ ruta.post('/importTires', async (req, res) => {
     });
 })
 
-function getDiseno(diseno) {
+function getDisenoForKey(diseno) {
     var disenoConcat = ""
     var disenoSplit = diseno.split(" ")
     disenoSplit.forEach(dis => {
