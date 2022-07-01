@@ -450,9 +450,12 @@ ruta.post('/importTires', async (req, res) => {
                             });
                         }
                     }
+                    if(i == rows.length){
+                        console.warn("Termina el proceso...")
+                        res.json(headers.getSuccessResponse(constantes.TIRES_EXCEL_LOAD, null));
+                    }
                 })
             })
-            res.json(headers.getSuccessResponse(constantes.TIRES_EXCEL_LOAD, null));
         }
     });
 })
