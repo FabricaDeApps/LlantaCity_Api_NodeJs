@@ -456,10 +456,11 @@ ruta.post('/importTires', async (req, res) => {
                         }
                     }                    
                 })
+                if(endProcess == true){
+                    res.json(headers.getSuccessResponse(constantes.TIRES_EXCEL_LOAD, null));
+                }
             })
-            if(endProcess == true){
-                res.json(headers.getSuccessResponse(constantes.TIRES_EXCEL_LOAD, null));
-            }
+            
         }
     });
 })
