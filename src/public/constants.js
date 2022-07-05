@@ -18,7 +18,7 @@ module.exports = Object.freeze({
   //PRODUCTS BACTH
   BATCH_PRODUCT: 'Registros actualizados en WooCommerce',
   PER_PAGE: 50,
-  
+
   //PRODUCTS EXCEL UPLOAD
   TIRES_EXCEL_LOAD: 'Se cargo exitosamente los registros del Excel en Mysql.',
   EXCEL_FILES: '/files/excel/',
@@ -26,11 +26,22 @@ module.exports = Object.freeze({
   NOT_EXCEL_FILES: "El archivo excel es requerido.",
   EXCEL_NOT_UPLOAD: "No fue posible leer el archivo por estas razones: ",
 
+  //USER
+  USER_DUPLICATE: 'El usuario ya se encuentra registrado.',
+  USER_PASSWORD: 'Se cambio exitosamente la contraseña.',
+  USER_NOT_GET: "Usuario o contraseña incorrecta.",
+  USER_NOT_EXIST: "El usuario no es valido.",
+  USER_LOGIN: "Sesión Iniciada.",
+  USER_NOT_ACTIVE: "El usuario no se encuentra activo, contacta al administrador.",
+
   //URLS
   URL_WOOCOMMERCE: 'https://llantacity.mx/',
   URL_IMAGE_WOOCOMERCE: 'https://llantacity.mx/admin/uploads/tires/',
 
   //KEYS_WOOCOMMERCE
   consumer_key: 'ck_2aff7f6c3d548b93ee2a1611e097432fe863c3ba',
-  consumer_secret: 'cs_df1ed41d68bc304a71db467a883fc92110395791'
+  consumer_secret: 'cs_df1ed41d68bc304a71db467a883fc92110395791',
+
+  //ERROR
+  SERVER_ERROR: 'Ocurrio un error en el servidor.',
 });
