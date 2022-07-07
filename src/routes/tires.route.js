@@ -402,6 +402,10 @@ ruta.post('/importTires', async (req, res) => {
     });
 })
 
+ruta.get('/getDate', async (req, res) => {
+    res.json(headers.getSuccessResponse(constantes.MSG_GET, {fecha: dateFormat(new Date(), "dd-mm-yyyy")}));
+})
+
 async function insertOrUpdateTire(row, i) {
     return await new Promise(async (resolve, reject) => {
         var params = {
