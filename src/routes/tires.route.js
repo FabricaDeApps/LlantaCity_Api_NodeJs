@@ -284,7 +284,7 @@ async function getAllTags() {
     });
 }
 
-ruta.post('/getExcelTires', async (req, res) => {
+ruta.get('/getExcelTires', async (req, res) => {
     //Get all categories
     await Tires.getAllTires().then(async tires => {
         let workbook = new excel.Workbook(); //creating workbook
