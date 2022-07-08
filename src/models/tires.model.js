@@ -32,11 +32,11 @@ exports.getAllTiresPagination = async function (request) {
         const page = request.page
         // calculate offset
         const offset = (page - 1) * limit
-        dbConn.query("Select * from t_tires LIMIT " + limit + " OFFSET " + offset, function (err, result) {
+        dbConn.query("Select * from t_tires where isDeleted = 0 LIMIT " + limit + " OFFSET " + offset, function (err, result) {
             if (err) {
                 return reject(err);
             } else {
-                dbConn.query("SELECT COUNT(*) AS cantidad FROM t_tires", function (err, quantity) {
+                dbConn.query("SELECT COUNT(*) AS cantidad FROM t_tires where isDeleted = 0", function (err, quantity) {
                     if (err) {
                         return reject(err);
                     } else {
@@ -80,7 +80,7 @@ exports.updateInUpdateWoocommerce = async function (body) {
     });
 }
 
-//Update tires from excel
+//Update tires
 exports.updateTires = async function (body) {
     return await new Promise((resolve, reject) => {
         dbConn.query("UPDATE t_tires SET codigo=?, categoria=?, marca=?, ancho=?, alto=?, rin=?, diseno=?, clasZR=?, indiceCarga=?, indiceVel=?, aplicacion=?, charge=?, homologacion=?, costo=?, existencia=?, image=?, createdTime=?, idProveedor=?, pesoVolumetrico=?, temperatura=?, traccion=?, treadwear=?, estilo=?, caracteristica=?, tipoIdentificacion=?, numeroIdentificacion=?, garantiaAnos=?, paisEnvio=?, tipoVehiculo=?, descripcionCorta=?, diametroTotal=?, altoTotal=? WHERE idTire = ?", 
@@ -102,6 +102,31 @@ exports.addNewTires = async function (body) {
                 return reject(err);
             } else {
                 return resolve(result.insertId);
+            }
+        });
+    });
+}
+
+
+exports.deleteTire = async function (keyLlantacity, id) {
+    return await new Promise((resolve, reject) => {
+        dbConn.query("UPDATE t_tires SET isDeleted=1 WHERE keyLlantacity = ? and id=?", [keyLlantacity, id], function (err, result) {
+            if (err) {
+                return reject(err);
+            } else {
+                return resolve(result);
+            }
+        });
+    });
+}
+
+exports.getProductTire = async function (keyLlantacity, id) {
+    return await new Promise((resolve, reject) => {
+        dbConn.query("Select * from t_tires WHERE keyLlantacity = ? and id=?", [keyLlantacity, id], function (err, result) {
+            if (err) {
+                return reject(err);
+            } else {
+                return resolve(result);
             }
         });
     });

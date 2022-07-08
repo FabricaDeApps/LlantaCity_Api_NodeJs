@@ -487,4 +487,27 @@ function getDisenoForKey(diseno) {
     })
     return disenoConcat
 }
+
+ruta.post('/getAll', async (req, res) => {
+    let body = req.body
+    await Tires.getAllTiresPagination(body).then(tires => {
+        res.json(headers.getSuccessResponse(constantes.LIST_MSG, tires));
+    }).catch(err => {
+        return res.status(500).json(headers.getInternalErrorResponse(constantes.SERVER_ERROR, err));
+    })
+})
+
+//AQUI NECESITO VER COMO ITERO CUANDO TENGA MAS DE UN -
+ruta.get('/getProduct/:sku', async (req, res) => {
+    var sku = req.params.sku
+    await Tires.getProductTire(req.params.hash_admin).then(usuario => {
+        if(usuario.length > 0){
+            delete usuario[0].password;
+        }
+        res.json(headers.getSuccessResponse(constantes.MSG_GET, usuario));
+    }).catch(err => {
+        return res.status(500).json(headers.getInternalErrorResponse(constantes.SERVER_ERROR, err));
+    })
+})
+
 module.exports = ruta
