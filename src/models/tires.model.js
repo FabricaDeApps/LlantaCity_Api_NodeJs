@@ -83,14 +83,14 @@ exports.updateInUpdateWoocommerce = async function (body) {
 //Update tires
 exports.updateTires = async function (body) {
     return await new Promise((resolve, reject) => {
-        dbConn.query("UPDATE t_tires SET codigo=?, categoria=?, marca=?, ancho=?, alto=?, rin=?, diseno=?, clasZR=?, indiceCarga=?, indiceVel=?, aplicacion=?, charge=?, homologacion=?, costo=?, existencia=?, image=?, createdTime=?, idProveedor=?, pesoVolumetrico=?, temperatura=?, traccion=?, treadwear=?, estilo=?, caracteristica=?, tipoIdentificacion=?, numeroIdentificacion=?, garantiaAnos=?, paisEnvio=?, tipoVehiculo=?, descripcionCorta=?, diametroTotal=?, altoTotal=? WHERE idTire = ?", 
-        [body.codigo, body.categoria, body.marca, body.ancho, body.alto, body.rin, body.diseno, body.clasZR, body.indiceCarga, body.indiceVel, body.aplicacion, body.charge, body.homologacion, body.costo, body.existencia, body.image, new Date(), body.idProveedor, body.pesoVolumetrico, body.temperatura, body.traccion, body.treadwear, body.estilo, body.caracteristica, body.tipoIdentificacion, body.numeroIdentificacion, body.garantiaAnos, body.paisEnvio, body.tipoVehiculo, body.descripcionCorta, body.diametroTotal, body.altoTotal, body.idTire], function (err, result) {
-            if (err) {
-                return reject(err);
-            } else {
-                return resolve(result);
-            }
-        });
+        dbConn.query("UPDATE t_tires SET codigo=?, categoria=?, marca=?, ancho=?, alto=?, rin=?, diseno=?, clasZR=?, indiceCarga=?, indiceVel=?, aplicacion=?, charge=?, homologacion=?, costo=?, existencia=?, image=?, createdTime=?, idProveedor=?, pesoVolumetrico=?, temperatura=?, traccion=?, treadwear=?, estilo=?, caracteristica=?, tipoIdentificacion=?, numeroIdentificacion=?, garantiaAnos=?, paisEnvio=?, tipoVehiculo=?, descripcionCorta=?, diametroTotal=?, altoTotal=? WHERE idTire = ?",
+            [body.codigo, body.categoria, body.marca, body.ancho, body.alto, body.rin, body.diseno, body.clasZR, body.indiceCarga, body.indiceVel, body.aplicacion, body.charge, body.homologacion, body.costo, body.existencia, body.image, new Date(), body.idProveedor, body.pesoVolumetrico, body.temperatura, body.traccion, body.treadwear, body.estilo, body.caracteristica, body.tipoIdentificacion, body.numeroIdentificacion, body.garantiaAnos, body.paisEnvio, body.tipoVehiculo, body.descripcionCorta, body.diametroTotal, body.altoTotal, body.idTire], function (err, result) {
+                if (err) {
+                    return reject(err);
+                } else {
+                    return resolve(result);
+                }
+            });
     });
 }
 
@@ -127,6 +127,36 @@ exports.getProductTire = async function (keyLlantacity, idTire) {
                 return reject(err);
             } else {
                 return resolve(result);
+            }
+        });
+    });
+}
+
+exports.searchProductTire = async function (request) {
+    return await new Promise((resolve, reject) => {
+        var searchData = request.search
+        const limit = request.limit
+        // page number
+        const page = request.page
+        // calculate offset
+        const offset = (page - 1) * limit
+        dbConn.query("Select * from t_tires where isDeleted = 0 and keyLlantaCity LIKE '%" + searchData + "%' OR rin LIKE '%" + searchData + "%' OR ancho LIKE '%" + searchData + "%' OR alto LIKE '%" + searchData + "%' LIMIT " + limit + " OFFSET " + offset, function (err, result) {
+            if (err) {
+                return reject(err);
+            } else {
+                dbConn.query("SELECT COUNT(*) AS cantidad FROM t_tires where isDeleted = 0 and keyLlantaCity LIKE '%" + searchData + "%' OR rin LIKE '%" + searchData + "%' OR ancho LIKE '%" + searchData + "%' OR alto LIKE '%" + searchData + "%'", function (err, quantity) {
+                    if (err) {
+                        return reject(err);
+                    } else {
+                        var jsonResult = {
+                            'total': quantity[0].cantidad,
+                            'per_page': limit,
+                            'current_page': page,
+                            'last_page': Number.isInteger(quantity[0].cantidad / limit) ? Math.round(quantity[0].cantidad / limit) : Math.round(quantity[0].cantidad / limit) + 1
+                        }
+                        return resolve({ pagination: jsonResult, tires: result });
+                    }
+                });
             }
         });
     });

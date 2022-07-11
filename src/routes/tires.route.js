@@ -579,6 +579,15 @@ ruta.put('/update', async (req, res) => {
     });
 })
 
+ruta.post('/searchProducts', async (req, res) => {
+    let body = req.body
+    await Tires.searchProductTire(body).then(tires => {
+        res.json(headers.getSuccessResponse(constantes.LIST_MSG, tires));
+    }).catch(err => {
+        return res.status(500).json(headers.getInternalErrorResponse(constantes.SERVER_ERROR, err));
+    })
+})
+
 function getKeyLlantaCity(marca, ancho, alto, rin, diseno, indiceCarga, indiceVel, idProveedor){
     return marca.substring(0, 3) + ancho + alto + rin + getDisenoForKey(diseno) + indiceCarga + indiceVel + "-" + idProveedor
 }
