@@ -108,9 +108,9 @@ exports.addNewTires = async function (body) {
 }
 
 
-exports.deleteTire = async function (keyLlantacity, id) {
+exports.deleteTire = async function (keyLlantacity, idTire) {
     return await new Promise((resolve, reject) => {
-        dbConn.query("UPDATE t_tires SET isDeleted=1 WHERE keyLlantacity = ? and id=?", [keyLlantacity, id], function (err, result) {
+        dbConn.query("UPDATE t_tires SET isDeleted=1 WHERE keyLlantacity = ? and idTire=?", [keyLlantacity, idTire], function (err, result) {
             if (err) {
                 return reject(err);
             } else {
@@ -120,9 +120,9 @@ exports.deleteTire = async function (keyLlantacity, id) {
     });
 }
 
-exports.getProductTire = async function (keyLlantacity, id) {
+exports.getProductTire = async function (keyLlantacity, idTire) {
     return await new Promise((resolve, reject) => {
-        dbConn.query("Select * from t_tires WHERE keyLlantacity = ? and id=?", [keyLlantacity, id], function (err, result) {
+        dbConn.query("Select * from t_tires WHERE keyLlantacity = ? and idTire=?", [keyLlantacity, idTire], function (err, result) {
             if (err) {
                 return reject(err);
             } else {

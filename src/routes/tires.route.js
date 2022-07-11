@@ -386,11 +386,11 @@ ruta.post('/importTires', async (req, res) => {
                 // `rows` is an array of rows
                 // each row being an array of cells.                
                 /* rows.forEach(async function (row, i) { */
-                for (var i = 0; i < rows.length; i++) {                    
+                for (var i = 0; i < rows.length; i++) {
                     if (i > 0) {
-                        await insertOrUpdateTire(rows[i], i).then(indxR => {                            
+                        await insertOrUpdateTire(rows[i], i).then(indxR => {
                             if (indxR == rows.length - 1) {
-                                console.warn("Termina el proceso...")                                
+                                console.warn("Termina el proceso...")
                             }
                         })
                     }
@@ -403,7 +403,7 @@ ruta.post('/importTires', async (req, res) => {
 })
 
 ruta.get('/getDate', async (req, res) => {
-    res.json(headers.getSuccessResponse(constantes.MSG_GET, {fecha: dateFormat(new Date(), "dd-mm-yyyy")}));
+    res.json(headers.getSuccessResponse(constantes.MSG_GET, { fecha: dateFormat(new Date(), "dd-mm-yyyy") }));
 })
 
 async function insertOrUpdateTire(row, i) {
@@ -497,17 +497,94 @@ ruta.post('/getAll', async (req, res) => {
     })
 })
 
-//AQUI NECESITO VER COMO ITERO CUANDO TENGA MAS DE UN -
 ruta.get('/getProduct/:sku', async (req, res) => {
-    var sku = req.params.sku
-    await Tires.getProductTire(req.params.hash_admin).then(usuario => {
-        if(usuario.length > 0){
-            delete usuario[0].password;
-        }
-        res.json(headers.getSuccessResponse(constantes.MSG_GET, usuario));
+    var splitSku = getSplitSku(req.params.sku)
+    await Tires.getProductTire(splitSku.keyLlantacity, splitSku.idTire).then(tire => {
+        res.json(headers.getSuccessResponse(constantes.MSG_GET, tire));
     }).catch(err => {
         return res.status(500).json(headers.getInternalErrorResponse(constantes.SERVER_ERROR, err));
     })
 })
 
+
+
+ruta.delete('/delete/:sku', async (req, res) => {
+    var splitSku = getSplitSku(req.params.sku)    
+    await Tires.getProductTire(splitSku.keyLlantacity, splitSku.idTire).then(async tire => {
+        if (tire.length == 0) {
+            return res.send(headers.getBadErrorResponse(constantes.TIRE_NOT_EXIST));
+        }
+        await Tires.deleteTire(splitSku.keyLlantacity, splitSku.idTire).then(tireD => {
+            res.send(headers.getSuccessResponse(constantes.DELETE_MSG, null));
+        }).catch((err) => {
+            return res.status(500).send(headers.getInternalErrorResponse(constantes.SERVER_ERROR, err));
+        });
+    }).catch((err) => {
+        return res.status(500).send(headers.getInternalErrorResponse(constantes.SERVER_ERROR, err));
+    });
+})
+
+ruta.post('/getAllPagination', async (req, res) => {
+    let body = req.body
+    await Tires.getAllTiresPagination(body).then(tires => {
+        res.json(headers.getSuccessResponse(constantes.LIST_MSG, tires));
+    }).catch(err => {
+        return res.status(500).json(headers.getInternalErrorResponse(constantes.SERVER_ERROR, err));
+    })
+})
+
+ruta.post('/add', async (req, res) => {
+    let body = req.body    
+    body.keyLlantacity = getKeyLlantaCity(body.marca, body.ancho, body.alto, body.rin, body.diseno, body.indiceCarga, body.indiceVel, body.idProveedor)
+    await Tires.getImageFromDiseno(body.diseno).then(async tireByDiseno => {
+        if (tireByDiseno.length > 0) {
+            body.image = tireByDiseno[0].image
+        } else {
+            body.image = null
+        }
+        await Tires.addNewTires(body).then(tires => {
+            res.send(headers.getSuccessResponse(constantes.SAVE_MSG, null));
+        }).catch((err) => {
+            return res.status(500).send(headers.getInternalErrorResponse(constantes.SERVER_ERROR, err));
+        });
+       
+    }).catch((err) => {
+        return res.status(500).send(headers.getInternalErrorResponse(constantes.SERVER_ERROR, err));
+    });    
+})
+
+ruta.put('/update', async (req, res) => {
+    let body = req.body
+    var keyLlantacity = getKeyLlantaCity(body.marca, body.ancho, body.alto, body.rin, body.diseno, body.indiceCarga, body.indiceVel, body.idProveedor)
+    await Tires.getProductTire(keyLlantacity, body.idTire).then(async tire => {
+        if (tire.length == 0) {
+            return res.send(headers.getBadErrorResponse(constantes.TIRE_NOT_EXIST));
+        }
+        await Tires.getImageFromDiseno(body.diseno).then(async tireByDiseno => {
+            if (tireByDiseno.length > 0) {
+                body.image = tireByDiseno[0].image
+            } else {
+                body.image = null
+            }            
+            await Tires.updateTires(body).then(tireU => {
+                res.send(headers.getSuccessResponse(constantes.UPDATE_MSG, null));
+            }).catch((err) => {
+                return res.status(500).send(headers.getInternalErrorResponse(constantes.SERVER_ERROR, err));
+            });
+        }).catch((err) => {
+            return res.status(500).send(headers.getInternalErrorResponse(constantes.SERVER_ERROR, err));
+        });            
+    }).catch((err) => {
+        return res.status(500).send(headers.getInternalErrorResponse(constantes.SERVER_ERROR, err));
+    });
+})
+
+function getKeyLlantaCity(marca, ancho, alto, rin, diseno, indiceCarga, indiceVel, idProveedor){
+    return marca.substring(0, 3) + ancho + alto + rin + getDisenoForKey(diseno) + indiceCarga + indiceVel + "-" + idProveedor
+}
+
+function getSplitSku(sku){
+    var splitSku = sku.split(/-(.+)/)
+    return {keyLlantacity: splitSku[1], idTire: splitSku[0]}
+}
 module.exports = ruta

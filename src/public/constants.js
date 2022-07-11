@@ -34,6 +34,11 @@ module.exports = Object.freeze({
   USER_LOGIN: "Sesión Iniciada.",
   USER_NOT_ACTIVE: "El usuario no se encuentra activo, contacta al administrador.",
 
+
+  //TIRES
+  TIRE_NOT_EXIST: "El poducto no es valido.",
+
+
   //URLS
   URL_WOOCOMMERCE: 'https://llantacity.mx/',
   URL_IMAGE_WOOCOMERCE: 'https://llantacity.mx/admin/uploads/tires/',
