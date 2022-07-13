@@ -82,11 +82,11 @@ exports.getAllAdmins = async function (request) {
         const page = request.page
         // calculate offset
         const offset = (page - 1) * limit
-        dbConn.query("Select * from t_admin where is_deleted = 0 LIMIT " + limit + " OFFSET " + offset, function (err, result) {
+        dbConn.query("Select * from t_admin where is_deleted = 0 and type != 'SuperAdmin' LIMIT " + limit + " OFFSET " + offset, function (err, result) {
             if (err) {
                 return reject(err);
             } else {
-                dbConn.query("SELECT COUNT(*) AS cantidad FROM t_admin where is_deleted = 0", function (err, quantity) {
+                dbConn.query("SELECT COUNT(*) AS cantidad FROM t_admin where is_deleted = 0 and type != 'SuperAdmin'", function (err, quantity) {
                     if (err) {
                         return reject(err);
                     } else {
