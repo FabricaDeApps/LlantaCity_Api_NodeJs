@@ -506,24 +506,6 @@ ruta.get('/getProduct/:sku', async (req, res) => {
     })
 })
 
-
-
-ruta.delete('/delete/:sku', async (req, res) => {
-    var splitSku = getSplitSku(req.params.sku)    
-    await Tires.getProductTire(splitSku.keyLlantacity, splitSku.idTire).then(async tire => {
-        if (tire.length == 0) {
-            return res.send(headers.getBadErrorResponse(constantes.TIRE_NOT_EXIST));
-        }
-        await Tires.deleteTire(splitSku.keyLlantacity, splitSku.idTire).then(tireD => {
-            res.send(headers.getSuccessResponse(constantes.DELETE_MSG, null));
-        }).catch((err) => {
-            return res.status(500).send(headers.getInternalErrorResponse(constantes.SERVER_ERROR, err));
-        });
-    }).catch((err) => {
-        return res.status(500).send(headers.getInternalErrorResponse(constantes.SERVER_ERROR, err));
-    });
-})
-
 ruta.post('/getAllPagination', async (req, res) => {
     let body = req.body
     await Tires.getAllTiresPagination(body).then(tires => {

@@ -32,11 +32,11 @@ exports.getAllTiresPagination = async function (request) {
         const page = request.page
         // calculate offset
         const offset = (page - 1) * limit
-        dbConn.query("Select * from t_tires where isDeleted = 0 LIMIT " + limit + " OFFSET " + offset, function (err, result) {
+        dbConn.query("Select * from t_tires LIMIT " + limit + " OFFSET " + offset, function (err, result) {
             if (err) {
                 return reject(err);
             } else {
-                dbConn.query("SELECT COUNT(*) AS cantidad FROM t_tires where isDeleted = 0", function (err, quantity) {
+                dbConn.query("SELECT COUNT(*) AS cantidad FROM t_tires", function (err, quantity) {
                     if (err) {
                         return reject(err);
                     } else {
@@ -107,19 +107,6 @@ exports.addNewTires = async function (body) {
     });
 }
 
-
-exports.deleteTire = async function (keyLlantacity, idTire) {
-    return await new Promise((resolve, reject) => {
-        dbConn.query("UPDATE t_tires SET isDeleted=1 WHERE keyLlantacity = ? and idTire=?", [keyLlantacity, idTire], function (err, result) {
-            if (err) {
-                return reject(err);
-            } else {
-                return resolve(result);
-            }
-        });
-    });
-}
-
 exports.getProductTire = async function (keyLlantacity, idTire) {
     return await new Promise((resolve, reject) => {
         dbConn.query("Select * from t_tires WHERE keyLlantacity = ? and idTire=?", [keyLlantacity, idTire], function (err, result) {
@@ -140,11 +127,11 @@ exports.searchProductTire = async function (request) {
         const page = request.page
         // calculate offset
         const offset = (page - 1) * limit
-        dbConn.query("Select * from t_tires where isDeleted = 0 and keyLlantaCity LIKE '%" + searchData + "%' OR rin LIKE '%" + searchData + "%' OR ancho LIKE '%" + searchData + "%' OR alto LIKE '%" + searchData + "%' LIMIT " + limit + " OFFSET " + offset, function (err, result) {
+        dbConn.query("Select * from t_tires where keyLlantaCity LIKE '%" + searchData + "%' OR rin LIKE '%" + searchData + "%' OR ancho LIKE '%" + searchData + "%' OR alto LIKE '%" + searchData + "%' LIMIT " + limit + " OFFSET " + offset, function (err, result) {
             if (err) {
                 return reject(err);
             } else {
-                dbConn.query("SELECT COUNT(*) AS cantidad FROM t_tires where isDeleted = 0 and keyLlantaCity LIKE '%" + searchData + "%' OR rin LIKE '%" + searchData + "%' OR ancho LIKE '%" + searchData + "%' OR alto LIKE '%" + searchData + "%'", function (err, quantity) {
+                dbConn.query("SELECT COUNT(*) AS cantidad FROM t_tires where keyLlantaCity LIKE '%" + searchData + "%' OR rin LIKE '%" + searchData + "%' OR ancho LIKE '%" + searchData + "%' OR alto LIKE '%" + searchData + "%'", function (err, quantity) {
                     if (err) {
                         return reject(err);
                     } else {
