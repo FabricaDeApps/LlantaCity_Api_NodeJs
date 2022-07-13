@@ -119,4 +119,20 @@ ruta.post('/getAll', async (req, res) => {
     })
 })
 
+ruta.put('/changeStatus', async (req, res) => {
+    let body = req.body
+    await Admin.findByHash(body.hash_admin).then(async admin => {
+        if (admin.length == 0) {
+            return res.send(headers.getBadErrorResponse(constantes.USER_NOT_EXIST));
+        }
+        await Admin.changeStatus(body).then(adminU => {
+            res.send(headers.getSuccessResponse(constantes.CHANGE_STATUS, null));
+        }).catch((err) => {
+            return res.status(500).send(headers.getInternalErrorResponse(constantes.SERVER_ERROR, err));
+        });
+    }).catch((err) => {
+        return res.status(500).send(headers.getInternalErrorResponse(constantes.SERVER_ERROR, err));
+    });
+})
+
 module.exports = ruta

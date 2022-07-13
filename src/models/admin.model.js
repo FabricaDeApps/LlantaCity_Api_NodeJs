@@ -106,3 +106,15 @@ exports.getAllAdmins = async function (request) {
         });
     });
 }
+
+exports.changeStatus = async function (body) {
+    return await new Promise((resolve, reject) => {
+        dbConn.query("UPDATE t_admin SET active=?, modified_date=? WHERE hash_admin = ?", [body.active, new Date(), body.hash_admin], function (err, result) {
+            if (err) {
+                return reject(err);
+            } else {
+                return resolve(result);
+            }
+        });
+    });
+}
