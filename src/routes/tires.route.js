@@ -2,6 +2,7 @@
 let headers = require('../public/headers');
 const constantes = require('../public/constants');
 const Tires = require('../models/tires.model');
+const Proveedor = require('../models/proveedores.model');
 const express = require('express')
 const ruta = express.Router()
 const axios = require('axios');
@@ -499,8 +500,12 @@ ruta.post('/getAll', async (req, res) => {
 
 ruta.get('/getProduct/:sku', async (req, res) => {
     var splitSku = getSplitSku(req.params.sku)
-    await Tires.getProductTire(splitSku.keyLlantacity, splitSku.idTire).then(tire => {
-        res.json(headers.getSuccessResponse(constantes.MSG_GET, tire));
+    await Tires.getProductTire(splitSku.keyLlantacity, splitSku.idTire).then(async tire => {
+        await Proveedor.getProveedorById(tire[0].idProveedor).then(proveedor => {
+            res.json(headers.getSuccessResponse(constantes.MSG_GET, {tire: tire[0], proveedor: proveedor[0]}));
+        }).catch(err => {
+            return res.status(500).json(headers.getInternalErrorResponse(constantes.SERVER_ERROR, err));
+        })        
     }).catch(err => {
         return res.status(500).json(headers.getInternalErrorResponse(constantes.SERVER_ERROR, err));
     })
