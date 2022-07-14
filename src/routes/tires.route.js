@@ -501,7 +501,7 @@ ruta.post('/getAll', async (req, res) => {
 ruta.get('/getProduct/:sku', async (req, res) => {
     var splitSku = getSplitSku(req.params.sku)
     await Tires.getProductTire(splitSku.keyLlantacity, splitSku.idTire).then(async tire => {
-        await Proveedor.getProveedorById(tire[0].idProveedor).then(proveedor => {
+        await Proveedor.getProveedorById(tire[0] == null || tire[0] == undefined ? 0 : tire[0].idProveedor).then(proveedor => {
             res.json(headers.getSuccessResponse(constantes.MSG_GET, {tire: tire[0], proveedor: proveedor[0]}));
         }).catch(err => {
             return res.status(500).json(headers.getInternalErrorResponse(constantes.SERVER_ERROR, err));
