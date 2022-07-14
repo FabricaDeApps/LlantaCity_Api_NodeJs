@@ -553,6 +553,7 @@ ruta.put('/update', async (req, res) => {
             } else {
                 body.image = null
             }
+            body.idTire = splitSku.idTire
             await Tires.updateTires(body).then(tireU => {
                 res.send(headers.getSuccessResponse(constantes.UPDATE_MSG, null));
             }).catch((err) => {
