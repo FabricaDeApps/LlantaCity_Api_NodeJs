@@ -5,11 +5,11 @@ function getBadErrorResponse(message, error) {
 }
 
 function getInternalErrorResponse(message, error) {
-    return { header: { status: constantes.CONFLICT, code: 500, message: message }, data: error }
+    return { header: { status: constantes.CONFLICT, code: 500, message: message }, data: error == null || error == undefined ? null : error }
 }
 
 function getSuccessResponse(message, data) {
-    return { header: { status: constantes.SUCCESS, code: 200, message: message }, data: data  }
+    return { header: { status: constantes.SUCCESS, code: 200, message: message }, data: data == null || data == undefined ? null : data }
 }
 
 function getUnauthorizedResponse(message) {

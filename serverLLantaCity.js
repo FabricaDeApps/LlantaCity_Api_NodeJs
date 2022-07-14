@@ -3,6 +3,7 @@ const app = express();
 const cors = require("cors");
 const tires_route = require('./src/routes/tires.route')
 const admin_route = require('./src/routes/admin.route')
+const proveedor_route = require('./src/routes/proveedores.route')
 const auth = require('./src/security/auth');
 const fs = require('fs');
 const https = require('https');
@@ -26,6 +27,7 @@ app.get('/', (req, res) => {
 //Rutas
 app.use(api + 'tires', auth, tires_route)
 app.use(api + 'admin', auth, admin_route)
+app.use(api + 'proveedor', auth, proveedor_route)
 
 const port = process.env.PORT || 8083;
 
