@@ -541,9 +541,8 @@ ruta.post('/add', async (req, res) => {
 })
 
 ruta.put('/update', async (req, res) => {
-    let body = req.body
-    var keyLlantacity = getKeyLlantaCity(body.marca, body.ancho, body.alto, body.rin, body.diseno, body.indiceCarga, body.indiceVel, body.idProveedor)
-    await Tires.getProductTire(keyLlantacity, body.idTire).then(async tire => {
+    let body = req.body    
+    await Tires.getProductTire(body.keyLlantacity, body.idTire).then(async tire => {
         if (tire.length == 0) {
             return res.send(headers.getBadErrorResponse(constantes.TIRE_NOT_EXIST));
         }
