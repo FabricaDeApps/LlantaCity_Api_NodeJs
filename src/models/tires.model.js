@@ -148,3 +148,16 @@ exports.searchProductTire = async function (request) {
         });
     });
 }
+
+
+exports.changeStatus = async function (keyLlantacity, idTire, active) {
+    return await new Promise((resolve, reject) => {
+        dbConn.query("UPDATE t_tires SET active=? WHERE keyLlantacity = ? and idTire=?", [active, keyLlantacity, idTire], function (err, result) {
+            if (err) {
+                return reject(err);
+            } else {
+                return resolve(result);
+            }
+        });
+    });
+}

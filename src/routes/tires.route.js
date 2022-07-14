@@ -447,7 +447,7 @@ async function insertOrUpdateTire(row, i) {
         if (params.idTire == "" || params.idTire == null || params.idTire == undefined) {
             //Crear nuevo registro de llanta                            
             delete params['idTire'];
-            params.keyLlantacity = params.marca.substring(0, 3) + params.ancho + params.alto + params.rin + getDisenoForKey(params.diseno) + params.indiceCarga + params.indiceVel + "-" + params.idProveedor
+            params.keyLlantacity = getKeyLlantaCity(params.marca, params.ancho, params.alto, params.rin, params.diseno, params.indiceCarga, params.indiceVel, params.idProveedor)
             await Tires.getImageFromDiseno(params.diseno).then(async tireByDiseno => {
                 if (tireByDiseno.length > 0) {
                     params.image = tireByDiseno[0].image
@@ -516,7 +516,7 @@ ruta.post('/getAllPagination', async (req, res) => {
 })
 
 ruta.post('/add', async (req, res) => {
-    let body = req.body    
+    let body = req.body
     body.keyLlantacity = getKeyLlantaCity(body.marca, body.ancho, body.alto, body.rin, body.diseno, body.indiceCarga, body.indiceVel, body.idProveedor)
     await Tires.getImageFromDiseno(body.diseno).then(async tireByDiseno => {
         if (tireByDiseno.length > 0) {
@@ -529,10 +529,10 @@ ruta.post('/add', async (req, res) => {
         }).catch((err) => {
             return res.status(500).send(headers.getInternalErrorResponse(constantes.SERVER_ERROR, err));
         });
-       
+
     }).catch((err) => {
         return res.status(500).send(headers.getInternalErrorResponse(constantes.SERVER_ERROR, err));
-    });    
+    });
 })
 
 ruta.put('/update', async (req, res) => {
@@ -547,7 +547,7 @@ ruta.put('/update', async (req, res) => {
                 body.image = tireByDiseno[0].image
             } else {
                 body.image = null
-            }            
+            }
             await Tires.updateTires(body).then(tireU => {
                 res.send(headers.getSuccessResponse(constantes.UPDATE_MSG, null));
             }).catch((err) => {
@@ -555,7 +555,7 @@ ruta.put('/update', async (req, res) => {
             });
         }).catch((err) => {
             return res.status(500).send(headers.getInternalErrorResponse(constantes.SERVER_ERROR, err));
-        });            
+        });
     }).catch((err) => {
         return res.status(500).send(headers.getInternalErrorResponse(constantes.SERVER_ERROR, err));
     });
@@ -570,12 +570,29 @@ ruta.post('/searchProducts', async (req, res) => {
     })
 })
 
-function getKeyLlantaCity(marca, ancho, alto, rin, diseno, indiceCarga, indiceVel, idProveedor){
+ruta.put('/changeStatus', async (req, res) => {
+    let body = req.body
+    var splitSku = getSplitSku(body.sku)
+    await Tires.getProductTire(splitSku.keyLlantacity, splitSku.idTire).then(async tire => {
+        if (tire.length == 0) {
+            return res.send(headers.getBadErrorResponse(constantes.TIRE_NOT_EXIST));
+        }
+        await Tires.changeStatus(splitSku.keyLlantacity, splitSku.idTire, body.active).then(tire => {
+            res.json(headers.getSuccessResponse(constantes.CHANGE_STATUS, null));
+        }).catch(err => {
+            return res.status(500).json(headers.getInternalErrorResponse(constantes.SERVER_ERROR, err));
+        })
+    }).catch(err => {
+        return res.status(500).json(headers.getInternalErrorResponse(constantes.SERVER_ERROR, err));
+    })
+})
+
+function getKeyLlantaCity(marca, ancho, alto, rin, diseno, indiceCarga, indiceVel, idProveedor) {
     return marca.substring(0, 3) + ancho + alto + rin + getDisenoForKey(diseno) + indiceCarga + indiceVel + "-" + idProveedor
 }
 
-function getSplitSku(sku){
+function getSplitSku(sku) {
     var splitSku = sku.split(/-(.+)/)
-    return {keyLlantacity: splitSku[1], idTire: splitSku[0]}
+    return { keyLlantacity: splitSku[1], idTire: splitSku[0] }
 }
 module.exports = ruta
