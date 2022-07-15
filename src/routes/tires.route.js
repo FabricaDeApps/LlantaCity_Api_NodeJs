@@ -468,7 +468,7 @@ async function insertOrUpdateTire(row, i) {
             });
         } else {
             //Actualizar registro de llanta                                                        
-            await Tires.updateTires(params).then(update => {
+            await Tires.updateTiresFromExcel(params).then(update => {
                 console.log("Registro actualizado por el idTire: ", params.idTire)
                 resolve(i)
             }).catch((err) => {
