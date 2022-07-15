@@ -594,7 +594,8 @@ ruta.put('/changeStatus', async (req, res) => {
 })
 
 function getKeyLlantaCity(marca, ancho, alto, rin, diseno, indiceCarga, indiceVel, idProveedor) {
-    return marca.substring(0, 3) + ancho + alto + rin + getDisenoForKey(diseno) + indiceCarga + indiceVel + "-" + idProveedor
+    var keyLlantaCity = marca.substring(0, 3) + ancho + alto + rin + getDisenoForKey(diseno) + indiceCarga + indiceVel    
+    return keyLlantaCity.replace(/[^a-zA-Z0-9 ]/g, '').toUpperCase() + "-" + idProveedor
 }
 
 function getSplitSku(sku) {
