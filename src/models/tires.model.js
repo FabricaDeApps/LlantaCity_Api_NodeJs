@@ -161,3 +161,16 @@ exports.changeStatus = async function (keyLlantacity, idTire, active) {
         });
     });
 }
+
+
+exports.addOrRemoveFavorite = async function (keyLlantacity, idTire, isFavorite) {
+    return await new Promise((resolve, reject) => {
+        dbConn.query("UPDATE t_tires SET isFavorite=? WHERE keyLlantacity = ? and idTire=?", [isFavorite, keyLlantacity, idTire], function (err, result) {
+            if (err) {
+                return reject(err);
+            } else {
+                return resolve(result);
+            }
+        });
+    });
+}

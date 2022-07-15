@@ -593,6 +593,31 @@ ruta.put('/changeStatus', async (req, res) => {
     })
 })
 
+ruta.put('/addOrUpdateFavorite', async (req, res) => {
+    let body = req.body
+    for(var i = 0; i < body.skus.length; i++){
+        var splitSku = getSplitSku(body.skus[i])
+        await Tires.getProductTire(splitSku.keyLlantacity, splitSku.idTire).then(async tire => {
+            if (tire.length == 0) {
+                console.warn(constantes.TIRE_NOT_EXIST + " key: ", body.skus[i])
+            } else{
+                await Tires.addOrRemoveFavorite(splitSku.keyLlantacity, splitSku.idTire, body.isFavorite).then(tire => {
+                    console.warn(constantes.UPDATE_MSG + " key: " + body.skus[i])
+                }).catch(err => {
+                    return res.status(500).json(headers.getInternalErrorResponse(constantes.SERVER_ERROR, err));
+                })
+            }
+            if(i == body.skus.length -1){
+                console.warn("Termina el proceso de isFavorite....")
+                res.json(headers.getSuccessResponse(constantes.CHANGE_STATUS, null));
+            }
+        }).catch(err => {
+            return res.status(500).json(headers.getInternalErrorResponse(constantes.SERVER_ERROR, err));
+        })
+    }   
+})
+
+
 function getKeyLlantaCity(marca, ancho, alto, rin, diseno, indiceCarga, indiceVel, idProveedor) {
     var keyLlantaCity = marca.substring(0, 3) + ancho + alto + rin + getDisenoForKey(diseno) + indiceCarga + indiceVel    
     return keyLlantaCity.replace(/[^a-zA-Z0-9 ]/g, '').toUpperCase() + "-" + idProveedor
