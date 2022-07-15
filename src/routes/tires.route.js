@@ -609,7 +609,7 @@ ruta.put('/addOrUpdateFavorite', async (req, res) => {
             }
             if(i == body.skus.length -1){
                 console.warn("Termina el proceso de isFavorite....")
-                res.json(headers.getSuccessResponse(constantes.CHANGE_STATUS, null));
+                res.json(headers.getSuccessResponse(constantes.FAVORITE_UPDATE_MSG, null));
             }
         }).catch(err => {
             return res.status(500).json(headers.getInternalErrorResponse(constantes.SERVER_ERROR, err));

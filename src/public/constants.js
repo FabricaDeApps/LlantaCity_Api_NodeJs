@@ -37,7 +37,7 @@ module.exports = Object.freeze({
 
   //TIRES
   TIRE_NOT_EXIST: "El poducto no es valido.",
-
+  FAVORITE_UPDATE_MSG: 'Se actualizarón los favoritos.',
 
   //URLS
   URL_WOOCOMMERCE: 'https://llantacity.mx/',
