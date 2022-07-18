@@ -364,7 +364,7 @@ ruta.get('/getExcelTires/:idProveedor', async (req, res) => {
                 })
             })
             res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-            res.setHeader('Content-Disposition', 'attachment; filename=' + 'LlantaCity_' + proveedor[0].razonSocial.replace(" ", "") + "_" + dateFormat(new Date(), "dd-mm-yyyy"), + '.xlsx');
+            res.setHeader('Content-Disposition', 'attachment; filename=' + 'LlantaCity_' + proveedor[0].nombreComercial.replace(" ", "") + "_" + dateFormat(new Date(), "dd-mm-yyyy"), + '.xlsx');
 
             await workbook.xlsx.write(res);
             res.status(200).end();
