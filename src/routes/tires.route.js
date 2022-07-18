@@ -285,88 +285,95 @@ async function getAllTags() {
     });
 }
 
-ruta.get('/getExcelTires', async (req, res) => {
-    //Get all categories
-    await Tires.getAllTires().then(async tires => {
-        let workbook = new excel.Workbook(); //creating workbook
+ruta.get('/getExcelTires/:idProveedor', async (req, res) => {
+    var idProveedor = req.params.idProveedor
+    await Proveedor.getProveedorById(idProveedor).then(async proveedor => {
+        if (proveedor.length == 0) {
+            return res.send(headers.getBadErrorResponse(constantes.PROVEEDOR_NOT_EXIST));
+        }
+        await Tires.getTiresByIdProveedor(idProveedor).then(async tires => {
+            let workbook = new excel.Workbook(); //creating workbook
 
-        const jsonPre = JSON.parse(JSON.stringify(tires));
-        let worksheet = workbook.addWorksheet(dateFormat(new Date(), "dd-mm-yyyy HH_MM")); //creating worksheet
+            const jsonPre = JSON.parse(JSON.stringify(tires));
+            let worksheet = workbook.addWorksheet(dateFormat(new Date(), "dd-mm-yyyy HH_MM")); //creating worksheet
 
-        //  WorkSheet Header
-        worksheet.columns = [
-            { header: 'idTire', key: 'idTire', width: 20 },
-            { header: 'keyLlantacity', key: 'keyLlantacity', width: 40 },
-            { header: 'codigo', key: 'codigo', width: 40 },
-            { header: 'categoria', key: 'categoria', width: 40 },
-            { header: 'marca', key: 'marca', width: 40 },
-            { header: 'ancho', key: 'ancho', width: 30 },
-            { header: 'alto', key: 'alto', width: 30 },
+            //  WorkSheet Header
+            worksheet.columns = [
+                { header: 'idTire', key: 'idTire', width: 20 },
+                { header: 'keyLlantacity', key: 'keyLlantacity', width: 40 },
+                { header: 'codigo', key: 'codigo', width: 40 },
+                { header: 'categoria', key: 'categoria', width: 40 },
+                { header: 'marca', key: 'marca', width: 40 },
+                { header: 'ancho', key: 'ancho', width: 30 },
+                { header: 'alto', key: 'alto', width: 30 },
 
-            { header: 'rin', key: 'rin', width: 30 },
-            { header: 'diseno', key: 'diseno', width: 40 },
-            { header: 'clasZR', key: 'clasZR', width: 40 },
-            { header: 'indiceCarga', key: 'indiceCarga', width: 40 },
-            { header: 'indiceVel', key: 'indiceVel', width: 40 },
-            { header: 'aplicacion', key: 'aplicacion', width: 50 },
-            { header: 'charge', key: 'charge', width: 40 },
-            { header: 'homologacion', key: 'homologacion', width: 40 },
-            { header: 'costo', key: 'costo', width: 40 },
-            { header: 'existencia', key: 'existencia', width: 30 },
-            { header: 'image', key: 'image', width: 40 },
-            { header: 'idProveedor', key: 'idProveedor', width: 30 },
-            { header: 'pesoVolumetrico', key: 'pesoVolumetrico', width: 40 },
-            { header: 'temperatura', key: 'temperatura', width: 40 },
-            { header: 'traccion', key: 'traccion', width: 40 },
-            { header: 'treadwear', key: 'treadwear', width: 40 },
-            { header: 'estilo', key: 'estilo', width: 40 },
-            { header: 'caracteristica', key: 'caracteristica', width: 40 },
-            { header: 'tipoIdentificacion', key: 'tipoIdentificacion', width: 40 },
-            { header: 'numeroIdentificacion', key: 'numeroIdentificacion', width: 40 },
-            { header: 'garantiaAnos', key: 'garantiaAnos', width: 40 },
-            { header: 'paisEnvio', key: 'paisEnvio', width: 40 },
-            { header: 'tipoVehiculo', key: 'tipoVehiculo', width: 40 },
-            { header: 'descripcionCorta', key: 'descripcionCorta', width: 50 },
-            { header: 'diametroTotal', key: 'diametroTotal', width: 40 },
-            { header: 'altoTotal', key: 'altoTotal', width: 40 }
-        ];
+                { header: 'rin', key: 'rin', width: 30 },
+                { header: 'diseno', key: 'diseno', width: 40 },
+                { header: 'clasZR', key: 'clasZR', width: 40 },
+                { header: 'indiceCarga', key: 'indiceCarga', width: 40 },
+                { header: 'indiceVel', key: 'indiceVel', width: 40 },
+                { header: 'aplicacion', key: 'aplicacion', width: 50 },
+                { header: 'charge', key: 'charge', width: 40 },
+                { header: 'homologacion', key: 'homologacion', width: 40 },
+                { header: 'costo', key: 'costo', width: 40 },
+                { header: 'existencia', key: 'existencia', width: 30 },
+                { header: 'image', key: 'image', width: 40 },
+                { header: 'idProveedor', key: 'idProveedor', width: 30 },
+                { header: 'pesoVolumetrico', key: 'pesoVolumetrico', width: 40 },
+                { header: 'temperatura', key: 'temperatura', width: 40 },
+                { header: 'traccion', key: 'traccion', width: 40 },
+                { header: 'treadwear', key: 'treadwear', width: 40 },
+                { header: 'estilo', key: 'estilo', width: 40 },
+                { header: 'caracteristica', key: 'caracteristica', width: 40 },
+                { header: 'tipoIdentificacion', key: 'tipoIdentificacion', width: 40 },
+                { header: 'numeroIdentificacion', key: 'numeroIdentificacion', width: 40 },
+                { header: 'garantiaAnos', key: 'garantiaAnos', width: 40 },
+                { header: 'paisEnvio', key: 'paisEnvio', width: 40 },
+                { header: 'tipoVehiculo', key: 'tipoVehiculo', width: 40 },
+                { header: 'descripcionCorta', key: 'descripcionCorta', width: 50 },
+                { header: 'diametroTotal', key: 'diametroTotal', width: 40 },
+                { header: 'altoTotal', key: 'altoTotal', width: 40 }
+            ];
 
-        // Add Array Rows
-        worksheet.addRows(jsonPre);
-        worksheet.eachRow(function (row, rowNumber) {
+            // Add Array Rows
+            worksheet.addRows(jsonPre);
+            worksheet.eachRow(function (row, rowNumber) {
 
-            row.eachCell((cell, colNumber) => {
-                if (rowNumber == 1) {
-                    // First set the background of header row
-                    cell.fill = {
-                        type: 'pattern',
-                        pattern: 'solid',
-                        fgColor: { argb: 'B6AEAE' }
-                    },
-                        cell.font = {
-                            bold: true,
-                            size: 13,
+                row.eachCell((cell, colNumber) => {
+                    if (rowNumber == 1) {
+                        // First set the background of header row
+                        cell.fill = {
+                            type: 'pattern',
+                            pattern: 'solid',
+                            fgColor: { argb: 'B6AEAE' }
                         },
-                        cell.alignment = {
-                            vertical: 'middle', horizontal: 'center'
+                            cell.font = {
+                                bold: true,
+                                size: 13,
+                            },
+                            cell.alignment = {
+                                vertical: 'middle', horizontal: 'center'
+                            };
+                        cell.border = {
+                            top: { style: 'thin' },
+                            left: { style: 'thin' },
+                            bottom: { style: 'thin' },
+                            right: { style: 'thin' }
                         };
-                    cell.border = {
-                        top: { style: 'thin' },
-                        left: { style: 'thin' },
-                        bottom: { style: 'thin' },
-                        right: { style: 'thin' }
-                    };
-                }
+                    }
+                })
             })
-        })
-        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        res.setHeader('Content-Disposition', 'attachment; filename=' + 'LlantaCityMxReg-' + dateFormat(new Date(), "dd-mm-yyyy"), + '.xlsx');
+            res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            res.setHeader('Content-Disposition', 'attachment; filename=' + 'LlantaCity_' + proveedor[0].razonSocial.replace(" ", "") + "_" + dateFormat(new Date(), "dd-mm-yyyy"), + '.xlsx');
 
-        await workbook.xlsx.write(res);
-        res.status(200).end();
-    }).catch((err) => {
+            await workbook.xlsx.write(res);
+            res.status(200).end();
+        }).catch((err) => {
+            return res.status(500).json(headers.getInternalErrorResponse(constantes.SERVER_ERROR, err));
+        });
+    }).catch(err => {
         return res.status(500).json(headers.getInternalErrorResponse(constantes.SERVER_ERROR, err));
-    });
+    })
 })
 
 ruta.post('/importTires', async (req, res) => {
@@ -502,10 +509,10 @@ ruta.get('/getProduct/:sku', async (req, res) => {
     var splitSku = getSplitSku(req.params.sku)
     await Tires.getProductTire(splitSku.keyLlantacity, splitSku.idTire).then(async tire => {
         await Proveedor.getProveedorById(tire[0] == null || tire[0] == undefined ? 0 : tire[0].idProveedor).then(proveedor => {
-            res.json(headers.getSuccessResponse(constantes.MSG_GET, {tire: tire[0], proveedor: proveedor[0]}));
+            res.json(headers.getSuccessResponse(constantes.MSG_GET, { tire: tire[0], proveedor: proveedor[0] }));
         }).catch(err => {
             return res.status(500).json(headers.getInternalErrorResponse(constantes.SERVER_ERROR, err));
-        })        
+        })
     }).catch(err => {
         return res.status(500).json(headers.getInternalErrorResponse(constantes.SERVER_ERROR, err));
     })
@@ -541,7 +548,7 @@ ruta.post('/add', async (req, res) => {
 })
 
 ruta.put('/update', async (req, res) => {
-    let body = req.body    
+    let body = req.body
     var splitSku = getSplitSku(body.sku)
     await Tires.getProductTire(splitSku.keyLlantacity, splitSku.idTire).then(async tire => {
         if (tire.length == 0) {
@@ -595,31 +602,31 @@ ruta.put('/changeStatus', async (req, res) => {
 
 ruta.put('/addOrUpdateFavorite', async (req, res) => {
     let body = req.body
-    for(var i = 0; i < body.skus.length; i++){
+    for (var i = 0; i < body.skus.length; i++) {
         var splitSku = getSplitSku(body.skus[i])
         await Tires.getProductTire(splitSku.keyLlantacity, splitSku.idTire).then(async tire => {
             if (tire.length == 0) {
                 console.warn(constantes.TIRE_NOT_EXIST + " key: ", body.skus[i])
-            } else{
+            } else {
                 await Tires.addOrRemoveFavorite(splitSku.keyLlantacity, splitSku.idTire, body.isFavorite).then(tire => {
                     console.warn(constantes.UPDATE_MSG + " key: " + body.skus[i])
                 }).catch(err => {
                     return res.status(500).json(headers.getInternalErrorResponse(constantes.SERVER_ERROR, err));
                 })
             }
-            if(i == body.skus.length -1){
+            if (i == body.skus.length - 1) {
                 console.warn("Termina el proceso de isFavorite....")
                 res.json(headers.getSuccessResponse(constantes.FAVORITE_UPDATE_MSG, null));
             }
         }).catch(err => {
             return res.status(500).json(headers.getInternalErrorResponse(constantes.SERVER_ERROR, err));
         })
-    }   
+    }
 })
 
 
 function getKeyLlantaCity(marca, ancho, alto, rin, diseno, indiceCarga, indiceVel, idProveedor) {
-    var keyLlantaCity = marca.substring(0, 3) + ancho + alto + rin + getDisenoForKey(diseno) + indiceCarga + indiceVel    
+    var keyLlantaCity = marca.substring(0, 3) + ancho + alto + rin + getDisenoForKey(diseno) + indiceCarga + indiceVel
     return keyLlantaCity.replace(/[^a-zA-Z0-9 ]/g, '').toUpperCase() + "-" + idProveedor
 }
 

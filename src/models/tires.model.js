@@ -13,6 +13,19 @@ exports.getAllTires = async function () {
     });
 }
 
+
+exports.getTiresByIdProveedor = async function (idProveedor) {
+    return await new Promise((resolve, reject) => {
+        dbConn.query("Select * from t_tires where idProveedor = ?", idProveedor, function (err, result) {
+            if (err) {
+                return reject(err);
+            } else {
+                return resolve(result);
+            }
+        });
+    });
+}
+
 exports.getImageFromDiseno = async function (diseno) {
     return await new Promise((resolve, reject) => {
         dbConn.query("SELECT *  FROM t_tires WHERE diseno LIKE ? LIMIT 0,1", diseno, function (err, result) {
