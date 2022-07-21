@@ -413,7 +413,7 @@ ruta.post('/importTires', async (req, res) => {
                 }
             })
             if (error > 0) {
-                console.warn(constantes.ERROR_LINE + fila)
+                console.warn(constantes.ERROR_LINE + fila + 1)
                 return res.json(headers.getBadErrorResponse(constantes.ERROR_LINE + fila));
             }
             res.json(headers.getSuccessResponse(constantes.TIRES_EXCEL_LOAD, null));
