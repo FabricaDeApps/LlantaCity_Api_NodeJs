@@ -389,6 +389,8 @@ ruta.post('/importTires', async (req, res) => {
                 return res.status(500).send(headers.getBadErrorResponse(constantes.NOT_EXCEL_FILES));
             }
             var pathExcel = req.file.path
+            var error = 0
+            var fila = ""
             // File path.
             await readXlsxFile(pathExcel).then(async (rows) => {
                 // `rows` is an array of rows
@@ -400,12 +402,20 @@ ruta.post('/importTires', async (req, res) => {
                             if (indxR == rows.length - 1) {
                                 console.warn("Termina el proceso...")
                             }
+                        }).catch(e => {
+                            error++
                         })
+                        if (error > 0) {
+                            fila = i
+                            break
+                        }
                     }
                 }
             })
+            if (error > 0) {
+                return res.json(headers.getBadErrorResponse(constantes.ERROR_LINE + fila));
+            }
             res.json(headers.getSuccessResponse(constantes.TIRES_EXCEL_LOAD, null));
-
         }
     });
 })
@@ -455,24 +465,28 @@ async function insertOrUpdateTire(row, i) {
         if (params.idTire == "" || params.idTire == null || params.idTire == undefined) {
             //Crear nuevo registro de llanta                            
             delete params['idTire'];
-            params.keyLlantacity = getKeyLlantaCity(params.marca, params.ancho, params.alto, params.rin, params.diseno, params.indiceCarga, params.indiceVel, params.idProveedor)
-            await Tires.getImageFromDiseno(params.diseno).then(async tireByDiseno => {
-                if (tireByDiseno.length > 0) {
-                    params.image = tireByDiseno[0].image
-                } else {
-                    params.image = null
-                }
-                await Tires.addNewTires(params).then(create => {
-                    console.log("Registro creado con el idTire: ", create)
-                    resolve(i)
+            await getKeyLlantaCity(params.marca, params.ancho, params.alto, params.rin, params.diseno, params.indiceCarga, params.indiceVel, params.idProveedor).then(async myKey => {
+                params.keyLlantacity = myKey
+                await Tires.getImageFromDiseno(params.diseno == null || params.diseno == undefined ? "" : params.diseno).then(async tireByDiseno => {
+                    if (tireByDiseno.length > 0) {
+                        params.image = tireByDiseno[0].image
+                    } else {
+                        params.image = null
+                    }
+                    await Tires.addNewTires(params).then(create => {
+                        console.log("Registro creado con el idTire: ", create)
+                        resolve(i)
+                    }).catch((err) => {
+                        console.warn("Ocurrio un error al insertar: ", err)
+                        resolve(i)
+                    });
                 }).catch((err) => {
-                    console.warn("Ocurrio un error al insertar: ", err)
+                    console.warn("Ocurrio un error al obtener la imagen: ", err)
                     resolve(i)
                 });
-            }).catch((err) => {
-                console.warn("Ocurrio un error al obtener la imagen: ", err)
-                resolve(i)
-            });
+            }).catch(e => {
+                reject(e)
+            })
         } else {
             //Actualizar registro de llanta                                                        
             await Tires.updateTiresFromExcel(params).then(update => {
@@ -487,13 +501,19 @@ async function insertOrUpdateTire(row, i) {
     });
 }
 
-function getDisenoForKey(diseno) {
-    var disenoConcat = ""
-    var disenoSplit = diseno.split(" ")
-    disenoSplit.forEach(dis => {
-        disenoConcat += dis.substring(0, 2)
-    })
-    return disenoConcat
+async function getDisenoForKey(diseno) {
+    return await new Promise((resolve, reject) => {
+        try {
+            var disenoConcat = ""
+            var disenoSplit = diseno.split(" ")
+            disenoSplit.forEach(dis => {
+                disenoConcat += dis.substring(0, 2)
+            })
+            resolve(disenoConcat)
+        } catch (error) {
+            reject(error)
+        }
+    });
 }
 
 ruta.post('/getAll', async (req, res) => {
@@ -529,21 +549,26 @@ ruta.post('/getAllPagination', async (req, res) => {
 
 ruta.post('/add', async (req, res) => {
     let body = req.body
-    body.keyLlantacity = getKeyLlantaCity(body.marca, body.ancho, body.alto, body.rin, body.diseno, body.indiceCarga, body.indiceVel, body.idProveedor)
-    await Tires.getImageFromDiseno(body.diseno).then(async tireByDiseno => {
-        if (tireByDiseno.length > 0) {
-            body.image = tireByDiseno[0].image
-        } else {
-            body.image = null
-        }
-        await Tires.addNewTires(body).then(tires => {
-            res.send(headers.getSuccessResponse(constantes.SAVE_MSG, null));
+    await getKeyLlantaCity(body.marca, body.ancho, body.alto, body.rin, body.diseno, body.indiceCarga, body.indiceVel, body.idProveedor).then(async myKey => {
+        body.keyLlantacity = myKey
+        await Tires.getImageFromDiseno(body.diseno).then(async tireByDiseno => {
+            if (tireByDiseno.length > 0) {
+                body.image = tireByDiseno[0].image
+            } else {
+                body.image = null
+            }
+            await Tires.addNewTires(body).then(tires => {
+                res.send(headers.getSuccessResponse(constantes.SAVE_MSG, null));
+            }).catch((err) => {
+                return res.status(500).send(headers.getInternalErrorResponse(constantes.SERVER_ERROR, err));
+            });
+
         }).catch((err) => {
             return res.status(500).send(headers.getInternalErrorResponse(constantes.SERVER_ERROR, err));
         });
-
     }).catch((err) => {
-        return res.status(500).send(headers.getInternalErrorResponse(constantes.SERVER_ERROR, err));
+        console.warn(err)
+        return res.status(500).send(headers.getInternalErrorResponse(constantes.ERROR_MSG + "al registrar el producto."));
     });
 })
 
@@ -625,9 +650,19 @@ ruta.put('/addOrUpdateFavorite', async (req, res) => {
 })
 
 
-function getKeyLlantaCity(marca, ancho, alto, rin, diseno, indiceCarga, indiceVel, idProveedor) {
-    var keyLlantaCity = marca.substring(0, 3) + ancho + alto + rin + getDisenoForKey(diseno) + indiceCarga + indiceVel
-    return keyLlantaCity.replace(/[^a-zA-Z0-9 ]/g, '').toUpperCase() + "-" + idProveedor
+async function getKeyLlantaCity(marca, ancho, alto, rin, diseno, indiceCarga, indiceVel, idProveedor) {
+    return await new Promise(async (resolve, reject) => {
+        await getDisenoForKey(diseno).then(disenoR => {
+            try {
+                var keyLlantaCity = marca.substring(0, 3) + ancho + alto + rin + disenoR + indiceCarga + indiceVel
+                resolve(keyLlantaCity.replace(/[^a-zA-Z0-9 ]/g, '').toUpperCase() + "-" + idProveedor)
+            } catch (error) {
+                reject(error)
+            }
+        }).catch(e => {
+            reject(e)
+        })
+    });
 }
 
 function getSplitSku(sku) {

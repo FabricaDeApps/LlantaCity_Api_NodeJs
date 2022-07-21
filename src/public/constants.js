@@ -8,6 +8,7 @@ module.exports = Object.freeze({
 
   //COMMON MESSAGES
   EMPTY_LIST: 'No hay registros disponibles.',
+  ERROR_MSG: 'Ocurrio un error: ',
   CHANGE_STATUS: 'El estatus ha sido actualizado con éxito.',
   DELETE_MSG: 'El registro ha sido eliminado con éxito.',
   SAVE_MSG: 'El registro se ha guardado correctamente.',
@@ -25,6 +26,7 @@ module.exports = Object.freeze({
   EXTENSION_NOT_MATCH: "La extensión del archivo no es valida.",
   NOT_EXCEL_FILES: "El archivo excel es requerido.",
   EXCEL_NOT_UPLOAD: "No fue posible leer el archivo por estas razones: ",
+  ERROR_LINE: "Ocurrio un error, revisa la fila: ",
 
   //USER
   USER_DUPLICATE: 'El usuario ya se encuentra registrado.',
