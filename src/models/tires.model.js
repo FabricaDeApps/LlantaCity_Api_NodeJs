@@ -134,6 +134,19 @@ exports.addNewTires = async function (body) {
     });
 }
 
+exports.getTireByCodigo = async function (codigo) {
+    return await new Promise((resolve, reject) => {
+        dbConn.query("Select * from t_tires WHERE codigo=?", codigo, function (err, result) {
+            if (err) {
+                return reject(err);
+            } else {
+                return resolve(result);
+            }
+        });
+    });
+}
+
+
 exports.getProductTire = async function (keyLlantacity, idTire) {
     return await new Promise((resolve, reject) => {
         dbConn.query("Select * from t_tires WHERE keyLlantacity = ? and idTire=?", [keyLlantacity, idTire], function (err, result) {

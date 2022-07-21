@@ -413,6 +413,7 @@ ruta.post('/importTires', async (req, res) => {
                 }
             })
             if (error > 0) {
+                console.warn(constantes.ERROR_LINE + fila)
                 return res.json(headers.getBadErrorResponse(constantes.ERROR_LINE + fila));
             }
             res.json(headers.getSuccessResponse(constantes.TIRES_EXCEL_LOAD, null));
@@ -473,13 +474,31 @@ async function insertOrUpdateTire(row, i) {
                     } else {
                         params.image = null
                     }
-                    await Tires.addNewTires(params).then(create => {
-                        console.log("Registro creado con el idTire: ", create)
-                        resolve(i)
-                    }).catch((err) => {
-                        console.warn("Ocurrio un error al insertar: ", err)
-                        resolve(i)
-                    });
+                    //antes de agregar un nuevo registro lo verifico con el codigo, si ya existe solo actualizo
+                    await Tires.getTireByCodigo(params.codigo).then(async tireCode => {
+                        if (tireCode.length > 0) {
+                            //le agrego el id tire que consulte por codigo
+                            params.idTire = tireCode[0].idTire
+                            //Actualizar registro de llanta por que existe el codigo de proveedor                                                      
+                            await Tires.updateTiresFromExcel(params).then(update => {
+                                console.log("Registro actualizado por codigo mediante el idTire: ", params.idTire)
+                                resolve(i)
+                            }).catch((err) => {
+                                console.warn("Ocurrio un error al actualizar: ", err)
+                                resolve(i)
+                            });
+                        } else {
+                            // Si no existe por código si creo el nuevo registro
+                            await Tires.addNewTires(params).then(create => {
+                                console.log("Registro creado con el idTire: ", create)
+                                resolve(i)
+                            }).catch((err) => {
+                                console.warn("Ocurrio un error al insertar: ", err)
+                                resolve(i)
+                            });
+                        }
+
+                    })
                 }).catch((err) => {
                     console.warn("Ocurrio un error al obtener la imagen: ", err)
                     resolve(i)
@@ -551,18 +570,25 @@ ruta.post('/add', async (req, res) => {
     let body = req.body
     await getKeyLlantaCity(body.marca, body.ancho, body.alto, body.rin, body.diseno, body.indiceCarga, body.indiceVel, body.idProveedor).then(async myKey => {
         body.keyLlantacity = myKey
-        await Tires.getImageFromDiseno(body.diseno).then(async tireByDiseno => {
-            if (tireByDiseno.length > 0) {
-                body.image = tireByDiseno[0].image
-            } else {
-                body.image = null
+        await Tires.getTireByCodigo(body.codigo).then(async tireCode => {
+            if (tireCode.length > 0) {
+                return res.send(headers.getBadErrorResponse(constantes.TIRE_CODE_EXIST));
             }
-            await Tires.addNewTires(body).then(tires => {
-                res.send(headers.getSuccessResponse(constantes.SAVE_MSG, null));
+            await Tires.getImageFromDiseno(body.diseno).then(async tireByDiseno => {
+                if (tireByDiseno.length > 0) {
+                    body.image = tireByDiseno[0].image
+                } else {
+                    body.image = null
+                }
+                await Tires.addNewTires(body).then(tires => {
+                    res.send(headers.getSuccessResponse(constantes.SAVE_MSG, null));
+                }).catch((err) => {
+                    return res.status(500).send(headers.getInternalErrorResponse(constantes.SERVER_ERROR, err));
+                });
+
             }).catch((err) => {
                 return res.status(500).send(headers.getInternalErrorResponse(constantes.SERVER_ERROR, err));
             });
-
         }).catch((err) => {
             return res.status(500).send(headers.getInternalErrorResponse(constantes.SERVER_ERROR, err));
         });

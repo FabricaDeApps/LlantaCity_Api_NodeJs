@@ -39,6 +39,7 @@ module.exports = Object.freeze({
 
   //TIRES
   TIRE_NOT_EXIST: "El poducto no es valido.",
+  TIRE_CODE_EXIST: "El código de producto ya existe.",
   FAVORITE_UPDATE_MSG: 'Se actualizarón los favoritos.',
 
   
