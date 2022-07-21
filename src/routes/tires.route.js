@@ -678,16 +678,23 @@ ruta.put('/addOrUpdateFavorite', async (req, res) => {
 
 async function getKeyLlantaCity(marca, ancho, alto, rin, diseno, indiceCarga, indiceVel, idProveedor) {
     return await new Promise(async (resolve, reject) => {
-        await getDisenoForKey(diseno).then(disenoR => {
-            try {
-                var keyLlantaCity = marca.substring(0, 3) + ancho + alto + rin + disenoR + indiceCarga + indiceVel
-                resolve(keyLlantaCity.replace(/[^a-zA-Z0-9 ]/g, '').toUpperCase() + "-" + idProveedor)
-            } catch (error) {
-                reject(error)
+        if (marca == null || marca == "" || ancho == null || ancho == "" ||
+            alto == null || alto == "" || rin == null || rin == "" ||
+            diseno == null || diseno == "" || indiceCarga == null || indiceCarga == "" ||
+            indiceVel == null || indiceVel == "" || idProveedor == null || idProveedor == ""){
+                console.warn("Error datos null...")
+                reject("Error datos null")
             }
-        }).catch(e => {
-            reject(e)
-        })
+            await getDisenoForKey(diseno).then(disenoR => {
+                try {
+                    var keyLlantaCity = marca.substring(0, 3) + ancho + alto + rin + disenoR + indiceCarga + indiceVel
+                    resolve(keyLlantaCity.replace(/[^a-zA-Z0-9 ]/g, '').toUpperCase() + "-" + idProveedor)
+                } catch (error) {
+                    reject(error)
+                }
+            }).catch(e => {
+                reject(e)
+            })
     });
 }
 
