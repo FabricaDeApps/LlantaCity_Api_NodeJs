@@ -57,7 +57,7 @@ exports.getAllTiresPagination = async function (request) {
                             'total': quantity[0].cantidad,
                             'per_page': limit,
                             'current_page': page,
-                            'last_page': Number.isInteger(quantity[0].cantidad / limit) ? Math.round(quantity[0].cantidad / limit) : Math.round(quantity[0].cantidad / limit) + 1
+                            'last_page': Number.isInteger(quantity[0].cantidad / limit) ? Math.round(quantity[0].cantidad / limit) : Math.ceil(quantity[0].cantidad / limit)
                         }
                         return resolve({ pagination: jsonResult, tires: result });
                     }
@@ -179,7 +179,7 @@ exports.searchProductTire = async function (request) {
                             'total': quantity[0].cantidad,
                             'per_page': limit,
                             'current_page': page,
-                            'last_page': Number.isInteger(quantity[0].cantidad / limit) ? Math.round(quantity[0].cantidad / limit) : Math.round(quantity[0].cantidad / limit) + 1
+                            'last_page': Number.isInteger(quantity[0].cantidad / limit) ? Math.round(quantity[0].cantidad / limit) : Math.ceil(quantity[0].cantidad / limit)
                         }
                         return resolve({ pagination: jsonResult, tires: result });
                     }

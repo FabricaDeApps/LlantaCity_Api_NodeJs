@@ -45,6 +45,7 @@ module.exports = Object.freeze({
   
   //PROVEEDOR
   PROVEEDOR_NOT_EXIST: "El proveedor no es valido.",
+  PROVEEDOR_DUPLICATE: 'El proveedor ya existe.',
 
   //URLS
   URL_WOOCOMMERCE: 'https://llantacity.mx/',
