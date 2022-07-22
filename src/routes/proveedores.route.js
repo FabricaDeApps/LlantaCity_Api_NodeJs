@@ -86,4 +86,21 @@ ruta.put('/changeStatus', async (req, res) => {
 })
 
 
+ruta.delete('/delete/:idProveedor', async (req, res) => {
+    var id = req.params.idProveedor
+    await Proveedor.getProveedorById(id).then(async proveedor => {
+        if (proveedor.length == 0) {
+            return res.send(headers.getBadErrorResponse(constantes.PROVEEDOR_NOT_EXIST));
+        }
+        await Proveedor.deleteProveedor(id).then(provU => {
+            res.send(headers.getSuccessResponse(constantes.DELETE_MSG, null));
+        }).catch((err) => {
+            return res.status(500).send(headers.getInternalErrorResponse(constantes.SERVER_ERROR, err));
+        });
+    }).catch((err) => {
+        return res.status(500).send(headers.getInternalErrorResponse(constantes.SERVER_ERROR, err));
+    });
+})
+
+
 module.exports = ruta

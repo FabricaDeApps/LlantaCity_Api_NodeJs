@@ -4,7 +4,7 @@ var dbConn = require('../../database/db.config');
 
 exports.getAllProveedoresActive = async function () {
     return await new Promise((resolve, reject) => {
-        dbConn.query("Select * from t_proveedores where active = 1", function (err, result) {
+        dbConn.query("Select * from t_proveedores where active = 1 and is_deleted = 0", function (err, result) {
             if (err) {
                 return reject(err);
             } else {
@@ -46,11 +46,11 @@ exports.getAllProveedores = async function (request) {
         const page = request.page
         // calculate offset
         const offset = (page - 1) * limit
-        dbConn.query("Select * from t_proveedores LIMIT " + limit + " OFFSET " + offset, function (err, result) {
+        dbConn.query("Select * from t_proveedores where is_deleted=0 LIMIT " + limit + " OFFSET " + offset, function (err, result) {
             if (err) {
                 return reject(err);
             } else {
-                dbConn.query("SELECT COUNT(*) AS cantidad FROM t_proveedores", function (err, quantity) {
+                dbConn.query("SELECT COUNT(*) AS cantidad FROM t_proveedores where is_deleted=0", function (err, quantity) {
                     if (err) {
                         return reject(err);
                     } else {
@@ -86,8 +86,20 @@ exports.addProveedor = async function (body) {
 
 exports.updateProveedor = async function (body) {
     return await new Promise((resolve, reject) => {
-        dbConn.query("UPDATE t_proveedores SET razonSocial=?, nombreComercial=?, direccion=?, municipio=?, estado=?, email=?, paginaWeb=?, telefono=?, ciudad=?, rfc=?, contacto=? WHERE idProveedor = ?", 
-        [body.razonSocial, body.nombreComercial, body.direccion, body.municipio, body.estado, body.email, body.paginaWeb, body.telefono, body.ciudad, body.rfc, body.contacto, body.idProveedor], function (err, result) {
+        dbConn.query("UPDATE t_proveedores SET razonSocial=?, nombreComercial=?, direccion=?, municipio=?, estado=?, email=?, paginaWeb=?, telefono=?, ciudad=?, rfc=?, contacto=? WHERE idProveedor = ?",
+            [body.razonSocial, body.nombreComercial, body.direccion, body.municipio, body.estado, body.email, body.paginaWeb, body.telefono, body.ciudad, body.rfc, body.contacto, body.idProveedor], function (err, result) {
+                if (err) {
+                    return reject(err);
+                } else {
+                    return resolve(result);
+                }
+            });
+    });
+}
+
+exports.changeStatus = async function (body) {
+    return await new Promise((resolve, reject) => {
+        dbConn.query("UPDATE t_proveedores SET active=? WHERE idProveedor = ?", [body.active, body.idProveedor], function (err, result) {
             if (err) {
                 return reject(err);
             } else {
@@ -97,9 +109,9 @@ exports.updateProveedor = async function (body) {
     });
 }
 
-exports.changeStatus = async function (body) {
+exports.deleteProveedor = async function (idProveedor) {
     return await new Promise((resolve, reject) => {
-        dbConn.query("UPDATE t_proveedores SET active=? WHERE idProveedor = ?", [body.active, body.idProveedor], function (err, result) {
+        dbConn.query("UPDATE t_proveedores SET is_deleted=1 WHERE idProveedor = ?", idProveedor, function (err, result) {
             if (err) {
                 return reject(err);
             } else {
