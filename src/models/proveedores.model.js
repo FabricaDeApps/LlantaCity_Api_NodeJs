@@ -63,7 +63,7 @@ exports.getAllProveedores = async function (request) {
                         for (var i of result) {
                             delete i.password;
                         }
-                        return resolve({ pagination: jsonResult, users: result });
+                        return resolve({ pagination: jsonResult, proveedores: result });
                     }
                 });
             }
