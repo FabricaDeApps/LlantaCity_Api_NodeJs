@@ -462,6 +462,12 @@ async function insertOrUpdateTire(row, i) {
             descripcionCorta: row[30],
             diametroTotal: row[31],
             altoTotal: row[32]
+        }        
+        if (params.existencia == null ||
+            params.costo == null || params.idProveedor == "" || params.idProveedor == null
+            || params.categoria == "" || params.categoria == null || params.codigo == "" || params.codigo == null) {
+            console.warn("Error datos nulal...")
+            return reject("Error datos null")
         }
         params.idTire + "".trim()
         if (params.idTire == "" || params.idTire == null || params.idTire == undefined) {
@@ -498,8 +504,10 @@ async function insertOrUpdateTire(row, i) {
                                 resolve(i)
                             });
                         }
-
-                    })
+                    }).catch((err) => {
+                        console.warn("Ocurrio un error al obtener el código: ", err)
+                        resolve(i)
+                    });
                 }).catch((err) => {
                     console.warn("Ocurrio un error al obtener la imagen: ", err)
                     resolve(i)
@@ -508,12 +516,22 @@ async function insertOrUpdateTire(row, i) {
                 reject(e)
             })
         } else {
-            //Actualizar registro de llanta                                                        
-            await Tires.updateTiresFromExcel(params).then(update => {
-                console.log("Registro actualizado por el idTire: ", params.idTire)
-                resolve(i)
+            //Actualizar registro de llanta      
+            await Tires.getImageFromDiseno(params.diseno == null || params.diseno == undefined ? "" : params.diseno).then(async tireByDiseno => {
+                if (tireByDiseno.length > 0) {
+                    params.image = tireByDiseno[0].image
+                } else {
+                    params.image = null
+                }
+                await Tires.updateTiresFromExcel(params).then(update => {
+                    console.log("Registro actualizado por el idTire: ", params.idTire)
+                    resolve(i)
+                }).catch((err) => {
+                    console.warn("Ocurrio un error al actualizar: ", err)
+                    resolve(i)
+                });
             }).catch((err) => {
-                console.warn("Ocurrio un error al actualizar: ", err)
+                console.warn("Ocurrio un error al obtener la imagen: ", err)
                 resolve(i)
             });
         }
@@ -682,20 +700,20 @@ async function getKeyLlantaCity(marca, ancho, alto, rin, diseno, indiceCarga, in
         if (marca == null || marca == "" || ancho == null || ancho == "" ||
             alto == null || alto == "" || rin == null || rin == "" ||
             diseno == null || diseno == "" || indiceCarga == null || indiceCarga == "" ||
-            indiceVel == null || indiceVel == "" || idProveedor == null || idProveedor == ""){
-                console.warn("Error datos null...")
-                reject("Error datos null")
+            indiceVel == null || indiceVel == "" || idProveedor == null || idProveedor == "") {
+            console.warn("Error datos null...")
+            reject("Error datos null")
+        }
+        await getDisenoForKey(diseno).then(disenoR => {
+            try {
+                var keyLlantaCity = marca.substring(0, 3) + ancho + alto + rin + disenoR + indiceCarga + indiceVel
+                resolve(keyLlantaCity.replace(/[^a-zA-Z0-9 ]/g, '').toUpperCase() + "-" + idProveedor)
+            } catch (error) {
+                reject(error)
             }
-            await getDisenoForKey(diseno).then(disenoR => {
-                try {
-                    var keyLlantaCity = marca.substring(0, 3) + ancho + alto + rin + disenoR + indiceCarga + indiceVel
-                    resolve(keyLlantaCity.replace(/[^a-zA-Z0-9 ]/g, '').toUpperCase() + "-" + idProveedor)
-                } catch (error) {
-                    reject(error)
-                }
-            }).catch(e => {
-                reject(e)
-            })
+        }).catch(e => {
+            reject(e)
+        })
     });
 }
 
